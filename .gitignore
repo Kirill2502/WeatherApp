@@ -1,0 +1,17 @@
+# Kotlin / Java
+*.iml
+.gradle
+/local.properties
+/.idea
+/build
+/captures
+.externalNativeBuild
+
+# Android Studio
+*.apk
+*.ap_
+*.aab
+
+# Others
+*.log
+.DS_Store
