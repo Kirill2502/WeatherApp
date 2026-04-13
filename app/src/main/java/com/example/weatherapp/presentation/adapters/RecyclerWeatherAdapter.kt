@@ -1,16 +1,15 @@
-package com.example.weatherapp.adapters
+package com.example.weatherapp.presentation.adapters
 
-import android.text.TextUtils.isEmpty
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.weatherapp.DayItem
-import com.example.weatherapp.FixRus
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ListItemBinding
+import com.example.weatherapp.domain.model.DayItem
+import com.example.weatherapp.utils.FixRus
 import com.squareup.picasso.Picasso
 
 

@@ -1,13 +1,11 @@
-package com.example.weatherapp
+package com.example.weatherapp.presentation
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.widget.EditText
-import androidx.core.content.ContextCompat.startActivity
 
 object DialogManager {
-    fun showGpsDisabledDialog(context: Context,listener: Listener) {
+    fun showGpsDisabledDialog(context: Context, listener: Listener) {
         val builder = AlertDialog.Builder(context)
         val dialog = builder.create()
         dialog.setTitle("Уведомление геолокации")
@@ -22,7 +20,7 @@ object DialogManager {
         }
         dialog.show()
     }
-    fun showSearchDialog(context: Context,listener: Listener) {
+    fun showSearchDialog(context: Context, listener: Listener) {
         val builder = AlertDialog.Builder(context)
         val edName = EditText(context)
         builder.setView(edName)

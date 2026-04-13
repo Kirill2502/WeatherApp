@@ -1,22 +1,18 @@
-package com.example.weatherapp.fragments
+package com.example.weatherapp.presentation.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weatherapp.DayItem
-import com.example.weatherapp.MainViewModel
-import com.example.weatherapp.adapters.RecyclerWeatherAdapter
+import com.example.weatherapp.presentation.viewModels.MainViewModel
+import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
 import com.example.weatherapp.databinding.FragmentHoursBinding
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.Collections.list
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.getValue
-
+@AndroidEntryPoint
 class HoursFragment : Fragment() {
     private lateinit var binding: FragmentHoursBinding
 
@@ -36,8 +32,8 @@ class HoursFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
 
-        model.liveDataCurrent.observe(viewLifecycleOwner){
-            adapter.submitList(getHoursList(it))
+        model.liveDataHours.observe(viewLifecycleOwner){house->
+            adapter.submitList(house)
 
             }
 
@@ -48,27 +44,7 @@ class HoursFragment : Fragment() {
         rcViewHousr.adapter = adapter
 
     }
-    private fun getHoursList(wItem: DayItem):List<DayItem>{
-        val hoursArray = JSONArray(wItem.hours)
-        val list = ArrayList<DayItem>()
-        for (i in 0 until hoursArray.length()){
 
-            val item = DayItem(
-                wItem.city,
-                (hoursArray[i] as JSONObject).getString("time").toString().takeLast(5),
-                (hoursArray[i] as JSONObject)
-                    .getJSONObject("condition").getString("text"),
-                (hoursArray[i] as JSONObject)
-                    .getJSONObject("condition").getString("icon"),
-                (hoursArray[i] as JSONObject).getString("temp_c").toDouble().toInt().toString(),
-                "",
-                "",
-                ""
-            )
-            list.add(item)
-        }
-        return list
-    }
 
     companion object {
         @JvmStatic

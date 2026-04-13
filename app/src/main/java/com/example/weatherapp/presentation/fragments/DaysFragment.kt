@@ -1,4 +1,4 @@
-package com.example.weatherapp.fragments
+package com.example.weatherapp.presentation.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,19 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weatherapp.DayItem
-import com.example.weatherapp.MainViewModel
-import com.example.weatherapp.R
-import com.example.weatherapp.adapters.RecyclerWeatherAdapter
+import com.example.weatherapp.data.model.DayItemDTO
+import com.example.weatherapp.presentation.viewModels.MainViewModel
+import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
 import com.example.weatherapp.databinding.FragmentDaysBinding
+import com.example.weatherapp.domain.model.DayItem
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
     lateinit var binding: FragmentDaysBinding
     lateinit var adapter: RecyclerWeatherAdapter
     private val model: MainViewModel by activityViewModels()
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.domain.model
 
 data class DayItem(
     val city: String,//название города
@@ -8,5 +8,5 @@ data class DayItem(
     val currentTemp: String, //текущая температура
     val maxTemp: String, //макс температура дня
     val minTemp: String, //мин температура дня
-    val hours: String, //температура по часам
+    val hours: String //температура по часам
 )

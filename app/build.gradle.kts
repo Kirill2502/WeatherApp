@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android") // KSP плагин
 }
 
 android {
@@ -44,6 +46,8 @@ dependencies {
     implementation ("androidx.fragment:fragment-ktx:1.8.8")
     implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation ("androidx.cardview:cardview:1.0.0")
+    implementation("com.google.dagger:hilt-android:2.57.2")
+    ksp("com.google.dagger:hilt-compiler:2.57.2")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

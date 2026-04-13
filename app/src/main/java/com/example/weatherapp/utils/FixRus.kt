@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.utils
 
 class FixRus {
     val weatherMap = mapOf("Partly Cloudy " to "Переменная облачность",
@@ -13,7 +13,7 @@ class FixRus {
         "Clear " to "Безоблачно",
         "Mist" to "Туман",
         "Light rain shower" to "Небольшой кратковременный дождь",
-        "Moderate rain" to "Умнеренный дождь",
+        "Moderate rain" to "Умеренный дождь",
         "Light rain" to "Небольшой дождь",
         "Thundery outbreaks in nearby" to "Громовые вспышки",
         "Patchy light rain in area with thunder" to "Местами небольшой дождь с грозой",
