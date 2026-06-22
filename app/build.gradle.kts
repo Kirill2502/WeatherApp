@@ -45,9 +45,11 @@ dependencies {
     implementation ("com.android.volley:volley:1.2.1")
     implementation ("androidx.fragment:fragment-ktx:1.8.8")
     implementation ("com.google.android.gms:play-services-location:21.3.0")
-    implementation ("androidx.cardview:cardview:1.0.0")
     implementation("com.google.dagger:hilt-android:2.57.2")
     ksp("com.google.dagger:hilt-compiler:2.57.2")
+    testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
