@@ -32,7 +32,14 @@
 ## 🚀 Возможности
 - Получение погоды по API  
 - Прогноз по дням и часам  
-- Разделение слоёв (Clean Architecture)  
+- Разделение слоёв (Clean Architecture)
+
+  ---
+  
+## 🧪 Тестирование
+- Unit-тесты `MainViewModel` с использованием MockK и `StandardTestDispatcher`
+- Проверка успешного обновления `LiveData` после загрузки погоды
+- Подмена `Dispatchers.Main` через `Dispatchers.setMain()`
 
 ---
 
