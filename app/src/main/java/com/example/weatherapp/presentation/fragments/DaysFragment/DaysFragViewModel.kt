@@ -24,10 +24,11 @@ class DaysFragViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private var collectJob: Job? = null
+
     init {
         viewModelScope.launch {
-            cityHolder.currentCity.collect {currentCity->
-                if (currentCity.isNotEmpty()){
+            cityHolder.currentCity.collect { currentCity ->
+                if (currentCity.isNotEmpty()) {
                     observeForecast(currentCity)
                 }
             }
@@ -35,17 +36,24 @@ class DaysFragViewModel @Inject constructor(
     }
 
 
-
     fun onEvent(event: DaysFragmentUiEvent) {
         when (event) {
             is DaysFragmentUiEvent.OnDaySelect -> {
-                selectedDayHolder.select(event.dayItem)
+                val isToday = _uiState.value.forecastListData
+                    .firstOrNull()?.time == event.dayItem.time
+                if (isToday) {
+                    selectedDayHolder.clear()
+                } else {
+                    selectedDayHolder.select(event.dayItem)
+                }
+
 
             }
 
 
         }
     }
+
     private fun observeForecast(city: String) {
         collectJob?.cancel()
         collectJob = viewModelScope.launch {
@@ -59,7 +67,6 @@ class DaysFragViewModel @Inject constructor(
             }
         }
     }
-
 
 
     override fun onCleared() {

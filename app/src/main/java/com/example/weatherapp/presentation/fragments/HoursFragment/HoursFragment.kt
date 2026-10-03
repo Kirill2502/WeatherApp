@@ -44,7 +44,8 @@ class HoursFragment : Fragment() {
 
 
     }
-    private fun observeUiState(){
+
+    private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 model.uiState.collect { uiState ->
@@ -60,6 +61,7 @@ class HoursFragment : Fragment() {
         rcViewHousr.adapter = adapter
 
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

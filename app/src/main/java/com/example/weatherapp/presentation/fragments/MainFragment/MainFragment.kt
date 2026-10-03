@@ -141,7 +141,7 @@ class MainFragment : Fragment() {
                     }
                     tvMaxMin.text = tempMaxMin
                     Picasso.get().load("https:" + uiState.currentData.imageUrl).into(imWeather)
-                    uiState.error?.let { message->
+                    uiState.error?.let { message ->
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         mainModel.onEvent(MainFragmentUiEvent.ErrorShow)
                     }

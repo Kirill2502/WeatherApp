@@ -24,6 +24,7 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
     private val binding get() = _binding!!
     lateinit var adapter: RecyclerWeatherAdapter
     private val model: DaysFragViewModel by activityViewModels()
+
     @Inject
     lateinit var fixRus: FixRus
 
@@ -31,7 +32,7 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentDaysBinding.inflate(inflater,container,false)
+        _binding = FragmentDaysBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -47,7 +48,8 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
             }
         }
     }
-    private fun initDaysAdapter()=with(binding){
+
+    private fun initDaysAdapter() = with(binding) {
         rcDays.layoutManager = LinearLayoutManager(activity)
         adapter = RecyclerWeatherAdapter(this@DaysFragment, fixRus)
         rcDays.adapter = adapter
@@ -65,6 +67,7 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
         fun newInstance() = DaysFragment()
 
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

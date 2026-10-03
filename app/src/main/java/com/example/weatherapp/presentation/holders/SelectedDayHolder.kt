@@ -15,4 +15,7 @@ class SelectedDayHolder @Inject constructor() {
     fun select(day: DayItem) {
         _selectedDay.value = day
     }
+    fun clear(){
+        _selectedDay.value = null
+    }
 }

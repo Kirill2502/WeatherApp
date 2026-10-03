@@ -31,7 +31,7 @@ fun WeatherResponseDTO.toEntities(city: String, updatedAt: Long): WeatherEntitie
     val forecastEntities = forecast.forecastDay.map { day ->
         ForecastDayEntity(
             cityCoordinates = cityKey,
-            localName =location.name ,
+            localName = location.name,
             date = day.date.fixEncoding(),
             condition = day.day.condition.text.fixEncoding(),
             imageUrl = day.day.condition.icon.fixEncoding(),
