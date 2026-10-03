@@ -8,15 +8,18 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ListItemBinding
-import com.example.weatherapp.domain.model.DayItem
+import com.example.weatherapp.domain.models.DayItem
 import com.example.weatherapp.utils.FixRus
 import com.squareup.picasso.Picasso
 
 
-class RecyclerWeatherAdapter(val listener: Listener?): ListAdapter<DayItem, RecyclerWeatherAdapter.Holder>(Comparator()) {
+class RecyclerWeatherAdapter(
+    val listener: Listener?,
+    private val fixRus: FixRus
+): ListAdapter<DayItem, RecyclerWeatherAdapter.Holder>(Comparator()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item,parent,false)
-        return Holder(view,listener)
+        return Holder(view,listener,fixRus)
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
@@ -27,7 +30,7 @@ class RecyclerWeatherAdapter(val listener: Listener?): ListAdapter<DayItem, Recy
 
 
 
-    class Holder(view: View,val listener: Listener?): RecyclerView.ViewHolder(view){
+    class Holder(view: View, val listener: Listener?, private val fixRus: FixRus): RecyclerView.ViewHolder(view){
         val binding = ListItemBinding.bind(view)
         var tempItem:DayItem? =null
         init {//функция инициализации
@@ -36,10 +39,9 @@ class RecyclerWeatherAdapter(val listener: Listener?): ListAdapter<DayItem, Recy
            }
         }
         fun bind(item: DayItem) = with(binding){
-            val mainFixRus = FixRus()
            tempItem = item
             tvDateItem.text = item.time
-            tvConditionItem.text = mainFixRus.getWeatherDescription(item.condition)//
+            tvConditionItem.text = fixRus.getWeatherDescription(item.condition)//
             when(item.currentTemp){
                 ""->tvTempItem.text ="${item.maxTemp}°C/${item.minTemp}°C"
                 else ->tvTempItem.text = "${item.currentTemp}°C"

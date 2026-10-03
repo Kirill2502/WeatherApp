@@ -1,6 +1,10 @@
 package com.example.weatherapp.utils
 
-class FixRus {
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class FixRus @Inject constructor() {
     val weatherMap = mapOf("Partly Cloudy " to "Переменная облачность",
         "Partly Cloudy" to "Переменная облачность",
         "Partly cloudy" to "Переменная облачность",

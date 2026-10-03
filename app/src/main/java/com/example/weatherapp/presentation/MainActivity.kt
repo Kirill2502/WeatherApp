@@ -7,7 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ActivityMainBinding
-import com.example.weatherapp.presentation.fragments.MainFragment
+import com.example.weatherapp.presentation.fragments.MainFragment.MainFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,6 +25,6 @@ class MainActivity : AppCompatActivity() {
         }
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.placeHolder, MainFragment.Companion.newInstance()).commit()
+            .replace(R.id.placeHolder, MainFragment.newInstance()).commit()
     }
 }
