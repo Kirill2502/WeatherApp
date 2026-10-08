@@ -19,7 +19,6 @@ import com.example.weatherapp.databinding.FragmentMainBinding
 import com.example.weatherapp.presentation.DialogManager
 import com.example.weatherapp.presentation.LocationProvider
 import com.example.weatherapp.presentation.adapters.VpAdapter
-import com.example.weatherapp.presentation.fragments.isPermissionGranted
 import com.example.weatherapp.utils.FixRus
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
@@ -39,8 +38,8 @@ class MainFragment : Fragment() {
     // Лаунчеры регистрируем полями класса: registerForActivityResult
     // нужно вызывать безусловно, до того как фрагмент перейдёт в STARTED
     private val pLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->// Достаточно любого разрешения: точного (FINE) или приблизительного (COARSE)
+            if (result.values.any { it }) {
                 checkLocation()// разрешение выдали — сразу грузим погоду
             } else {
                 Toast.makeText(
@@ -81,10 +80,10 @@ class MainFragment : Fragment() {
         // Геолокацию запрашиваем только при первом запуске, когда город ещё не выбран.
         // ViewModel переживает поворот экрана, поэтому после поворота город уже есть.
         if (mainModel.uiState.value.city.isEmpty()) {
-            if (isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (locationProvider.hasLocationPermission()) {
                 checkLocation()
             } else {
-                pLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                requestLocationPermission()
             }
         }
 
@@ -112,12 +111,38 @@ class MainFragment : Fragment() {
 
         }
 
+    // Android 12+ требует запрашивать FINE и COARSE вместе —
+    // тогда пользователь сам выберет точную или приблизительную геолокацию
+    private fun requestLocationPermission() {
+        pLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+
+    }
+
 
     private fun checkLocation() {
-        if (locationProvider.isLocationEnabled()) {
-            locationProvider.getCurrentCoordinates { coords ->
-                mainModel.onEvent(MainFragmentUiEvent.LoadWeatherCoord(coords))
-            }
+        if (!locationProvider.hasLocationPermission()) {
+            requestLocationPermission()
+        } else if (locationProvider.isLocationEnabled()) {
+            locationProvider.getCurrentCoordinates(
+                onResult = { coords ->
+                    mainModel
+                        .onEvent(MainFragmentUiEvent.LoadWeatherCoord(coords))
+
+                },
+                onError = {
+                    // Колбэк асинхронный: фрагмент мог уже отсоединиться, поэтому context?
+                    context?.let {
+                        Toast.makeText(it, "Не удалось определить местоположение", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                }
+            )
         } else {
             DialogManager.showGpsDisabledDialog(requireContext(), object : DialogManager.Listener {
                 override fun onClick(name: String?) {
