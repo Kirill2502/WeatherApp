@@ -1,13 +1,17 @@
 package com.example.weatherapp.presentation.fragments.MainFragment
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.R
+import com.example.weatherapp.domain.error.AppError
 import com.example.weatherapp.domain.models.DayItem
 import com.example.weatherapp.domain.useCases.GetCurrentWeatherUseCase
 import com.example.weatherapp.domain.useCases.RefreshWeatherUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainFragViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val getCurrentWeatherUseCase: GetCurrentWeatherUseCase,
     private val refreshWeatherUseCase: RefreshWeatherUseCase,
     private val selectedDayHolder: SelectedDayHolder,
@@ -56,8 +61,6 @@ class MainFragViewModel @Inject constructor(
             }
 
             is MainFragmentUiEvent.LoadWeatherCoord -> {
-
-
                 loadWeather(event.coords)
             }
 
@@ -91,15 +94,24 @@ class MainFragViewModel @Inject constructor(
     private fun refresh(city: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
-            try {
-                refreshWeatherUseCase(city)
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message ?: "Ошибка обновления") }
-            } finally {
-                _uiState.update { it.copy(isRefreshing = false) }
-            }
+            refreshWeatherUseCase(city)
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.toUserMessage( )) }
+
+
+                }
         }
     }
+
+    private fun Throwable.toUserMessage(): String = when (this) {
+        is AppError.NetworkError -> context.getString(R.string.error_network)
+        is AppError.ParseError -> context.getString(R.string.error_parsing)
+        is AppError.ServerError -> context.getString(R.string.error_server, code)
+        is AppError.DataBaseError -> context.getString(R.string.error_database)
+        is AppError.UnknownError -> context.getString(R.string.error_unknown)
+        else -> message ?: context.getString(R.string.error_else)
+    }
+
 
     // общая логика — и для города, и для координат
     private fun loadWeather(city: String) {
@@ -109,9 +121,5 @@ class MainFragViewModel @Inject constructor(
         refresh(city)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        collectJob?.cancel()
-    }
 
 }

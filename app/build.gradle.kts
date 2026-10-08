@@ -1,8 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+}
+val localProperties = Properties().apply{
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
@@ -22,7 +28,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "WEATHER_API_KEY", "\"d169aff430f54f869b3100235252806\"")
+        // Ключ берём из local.properties (файл в .gitignore), чтобы он не попадал в git
+        val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY")
+            ?: error("Добавьте WEATHER_API_KEY=<ваш ключ> в local.properties")
+        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,6 +55,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.ui)
     implementation(libs.picasso)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.play.services.location)

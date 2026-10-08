@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -23,8 +23,13 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.placeHolder, MainFragment.newInstance()).commit()
+        // При повороте экрана FragmentManager сам восстанавливает фрагмент.
+        // Добавляем его только при первом создании, иначе получим дубликат.
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.placeHolder, MainFragment.newInstance()).commit()
+        }
+
     }
 }

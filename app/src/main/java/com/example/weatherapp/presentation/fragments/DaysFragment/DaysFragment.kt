@@ -22,7 +22,7 @@ import javax.inject.Inject
 class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
     private var _binding: FragmentDaysBinding? = null
     private val binding get() = _binding!!
-    lateinit var adapter: RecyclerWeatherAdapter
+    private lateinit var adapter: RecyclerWeatherAdapter
     private val model: DaysFragViewModel by activityViewModels()
 
     @Inject

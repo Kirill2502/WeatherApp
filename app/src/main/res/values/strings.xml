@@ -6,4 +6,10 @@
     <string name="gps_disabled_message">GPS is disabled on your device, connection required</string>
     <string name="enable_gps">connect</string>
     <string name="cancel" tools:ignore="ButtonCase">cancel</string>
+    <string name="error_network">Нет подключения к интернету</string>
+    <string name="error_parsing">Не удалось обработать данные</string>
+    <string name="error_server">Ошибка сервера: %d</string>
+    <string name="error_database">Ошибка базы данных</string>
+    <string name="error_unknown">Что-то пошло не так</string>
+    <string name="error_else">Ошибка обновления</string>
 </resources>

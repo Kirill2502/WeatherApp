@@ -9,7 +9,7 @@ object DialogManager {
         val builder = AlertDialog.Builder(context)
         val dialog = builder.create()
         dialog.setTitle("Уведомление геолокации")
-        dialog.setMessage("GPS отключен на вашем устройстве, требуется подключение!")
+        dialog.setMessage("GPS отключен на вашем устройстве")
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Включить") { _, _ ->
             listener.onClick(null)
             dialog.dismiss()

@@ -1,4 +1,4 @@
-package com.example.weatherapp.data.remoteDataSource
+package com.example.weatherapp.data.remote
 
 import com.example.weatherapp.BuildConfig
 import com.example.weatherapp.data.models.WeatherResponseDTO
@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RemoteData @Inject constructor(
+class WeatherRemoteDataSource @Inject constructor(
     private val weatherApi: WeatherApi,
 ) {
 

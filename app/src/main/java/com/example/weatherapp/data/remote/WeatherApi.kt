@@ -1,4 +1,4 @@
-package com.example.weatherapp.data.remoteDataSource
+package com.example.weatherapp.data.remote
 
 import com.example.weatherapp.data.models.WeatherResponseDTO
 import retrofit2.http.GET

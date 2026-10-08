@@ -68,9 +68,4 @@ class DaysFragViewModel @Inject constructor(
         }
     }
 
-
-    override fun onCleared() {
-        super.onCleared()
-        collectJob?.cancel()
-    }
 }

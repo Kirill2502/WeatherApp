@@ -43,7 +43,7 @@ class RecyclerWeatherAdapter(
             tvDateItem.text = item.time
             tvConditionItem.text = fixRus.getWeatherDescription(item.condition)//
             when(item.currentTemp){
-                ""->tvTempItem.text ="${item.maxTemp}°C/${item.minTemp}°C"
+                ""->tvTempItem.text ="${item.maxTemp}/${item.minTemp}°C"
                 else ->tvTempItem.text = "${item.currentTemp}°C"
             }
             Picasso.get().load("https:"+item.imageUrl).into(imItem)
