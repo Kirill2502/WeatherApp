@@ -2,9 +2,11 @@ package com.example.weatherapp.presentation.fragments.DaysFragment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
+import com.example.weatherapp.presentation.mappers.toListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +26,7 @@ class DaysFragViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private var collectJob: Job? = null
+    private var forecast: List<DailyForecast> = emptyList()
 
     init {
         viewModelScope.launch {
@@ -39,15 +42,13 @@ class DaysFragViewModel @Inject constructor(
     fun onEvent(event: DaysFragmentUiEvent) {
         when (event) {
             is DaysFragmentUiEvent.OnDaySelect -> {
-                val isToday = _uiState.value.forecastListData
-                    .firstOrNull()?.time == event.dayItem.time
+                val day = forecast.firstOrNull { it.date.toString() == event.itemId } ?: return
+                val isToday = forecast.firstOrNull()?.date == day.date
                 if (isToday) {
                     selectedDayHolder.clear()
                 } else {
-                    selectedDayHolder.select(event.dayItem)
+                    selectedDayHolder.select(day)
                 }
-
-
             }
 
 
@@ -57,15 +58,16 @@ class DaysFragViewModel @Inject constructor(
     private fun observeForecast(city: String) {
         collectJob?.cancel()
         collectJob = viewModelScope.launch {
-            getForecastWeatherUseCase(city).collect { forecast ->
+            getForecastWeatherUseCase(city).collect { days ->
+                forecast = days
                 _uiState.update {
                     it.copy(
-                        forecastListData = forecast
-
+                        forecastListData = days.map { day -> day.toListItem() }
                     )
                 }
             }
         }
     }
+
 
 }

@@ -1,11 +1,13 @@
 package com.example.weatherapp.presentation.viewModels
 
-import com.example.weatherapp.domain.models.DayItem
+import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
 import com.example.weatherapp.presentation.fragments.DaysFragment.DaysFragmentUiEvent
 import com.example.weatherapp.presentation.fragments.DaysFragment.DaysFragViewModel
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
+import com.example.weatherapp.presentation.mappers.toListItem
+import com.example.weatherapp.presentation.models.WeatherListItemUi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,8 +21,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DaysFragViewModelTest {
@@ -54,39 +58,55 @@ class DaysFragViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals(emptyList<DayItem>(), viewModel.uiState.value.forecastListData)
+        assertEquals(emptyList<WeatherListItemUi>(), viewModel.uiState.value.forecastListData)
     }
 
     @Test
     fun `when city is set, forecast is loaded from use case`() = runTest(testDispatcher) {
-        val forecast = listOf(forecastItem)
+        val forecast = listOf(today, tomorrow)
         every { getForecastWeatherUseCase("Moscow") } returns flowOf(forecast)
 
         val viewModel = createViewModel()
         cityHolder.set("Moscow")
         advanceUntilIdle()
 
-        assertEquals(forecast, viewModel.uiState.value.forecastListData)
+        assertEquals(forecast.map { it.toListItem() }, viewModel.uiState.value.forecastListData)
         verify(exactly = 1) { getForecastWeatherUseCase("Moscow") }
     }
 
     @Test
     fun `when OnDaySelect event, selected day is stored in holder`() = runTest(testDispatcher) {
+        every { getForecastWeatherUseCase("Moscow") } returns flowOf(listOf(today, tomorrow))
         val viewModel = createViewModel()
+        cityHolder.set("Moscow")
+        advanceUntilIdle()
 
-        viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(forecastItem))
+        viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(tomorrow.date.toString()))
 
-        assertEquals(forecastItem, selectedDayHolder.selectedDay.value)
+        assertEquals(tomorrow, selectedDayHolder.selectedDay.value)
     }
 
-    private val forecastItem = DayItem(
-        cityCoordinates = "Moscow",
-        time = "2026-09-22",
-        condition = "Sunny",
-        imageUrl = "//cdn.weatherapi.com/...",
-        currentTemp = "20",
-        maxTemp = "25",
-        minTemp = "15",
-        hours = ""
+    @Test
+    fun `when today is selected, selection is cleared`() = runTest(testDispatcher) {
+        every { getForecastWeatherUseCase("Moscow") } returns flowOf(listOf(today, tomorrow))
+        val viewModel = createViewModel()
+        cityHolder.set("Moscow")
+        advanceUntilIdle()
+        selectedDayHolder.select(tomorrow)
+
+        viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(today.date.toString()))
+
+        assertNull(selectedDayHolder.selectedDay.value)
+    }
+
+    private val today = DailyForecast(
+        date = LocalDate.of(2026, 9, 22),
+        conditionText = "Sunny",
+        conditionCode = 1000,
+        iconUrl = "https://cdn.weatherapi.com/sunny.png",
+        maxTempC = 25.0,
+        minTempC = 15.0
     )
+
+    private val tomorrow = today.copy(date = LocalDate.of(2026, 9, 23), maxTempC = 22.0)
 }

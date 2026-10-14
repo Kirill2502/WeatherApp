@@ -11,8 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.databinding.FragmentDaysBinding
-import com.example.weatherapp.domain.models.DayItem
 import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
+import com.example.weatherapp.presentation.models.WeatherListItemUi
 import com.example.weatherapp.utils.FixRus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -55,8 +55,8 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
         rcDays.adapter = adapter
     }
 
-    override fun onClick(item: DayItem) {
-        model.onEvent(DaysFragmentUiEvent.OnDaySelect(item))
+    override fun onClick(item: WeatherListItemUi) {
+        model.onEvent(DaysFragmentUiEvent.OnDaySelect(item.id))
 
     }
 

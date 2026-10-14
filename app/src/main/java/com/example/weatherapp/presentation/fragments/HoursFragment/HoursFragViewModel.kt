@@ -2,10 +2,12 @@ package com.example.weatherapp.presentation.fragments.HoursFragment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.domain.models.DayItem
+import com.example.weatherapp.domain.models.DailyForecast
+import com.example.weatherapp.domain.models.HourlyForecast
 import com.example.weatherapp.domain.useCases.GetHoursWeatherUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
+import com.example.weatherapp.presentation.mappers.toListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,7 @@ class HoursFragViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HoursUiState())
     val uiState = _uiState.asStateFlow()
     private var collectJob: Job? = null
-    private var allHours: List<DayItem> = emptyList() // ← кэш ВСЕХ часов
+    private var allHours: List<HourlyForecast> = emptyList() // ← кэш ВСЕХ часов
 
 
     init {
@@ -44,15 +46,17 @@ class HoursFragViewModel @Inject constructor(
         }
     }
 
-    private fun filterHoursByDay(day: DayItem?) {
+    private fun filterHoursByDay(day: DailyForecast?) {
         val filtered = if (day == null) {
             // Ничего не выбрано → показываем первые 24 часа (сегодня)
             allHours.take(24)
         } else {
-            // День выбран → фильтруем часы по дате
-            allHours.filter { it.time.startsWith(day.time) }
+            // День выбран → фильтруем часы по дате (сравниваем даты, а не строки)
+            allHours.filter { it.time.toLocalDate() == day.date }
         }
-        _uiState.update { it.copy(hoursListData = filtered) }
+        _uiState.update {
+            it.copy(hoursListData = filtered.map { hour -> hour.toListItem() })
+        }
     }
 
     private fun observeHours(city: String) {
@@ -66,8 +70,5 @@ class HoursFragViewModel @Inject constructor(
     }
 
 
-    override fun onCleared() {
-        super.onCleared()
-        collectJob?.cancel()
-    }
+
 }

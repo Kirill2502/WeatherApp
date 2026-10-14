@@ -48,6 +48,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlin {
         jvmToolchain(11)
@@ -56,6 +57,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.ui)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.picasso)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.play.services.location)

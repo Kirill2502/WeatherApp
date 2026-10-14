@@ -1,7 +1,7 @@
 package com.example.weatherapp.presentation.fragments.HoursFragment
 
-import com.example.weatherapp.domain.models.DayItem
+import com.example.weatherapp.presentation.models.WeatherListItemUi
 
 data class HoursUiState(
-    val hoursListData: List<DayItem> = emptyList(),
+    val hoursListData: List<WeatherListItemUi> = emptyList(),
 )

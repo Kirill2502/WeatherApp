@@ -12,7 +12,7 @@ import com.example.weatherapp.data.room.entityes.HourlyWeatherEntity
         CurrentWeatherEntity::class,
         ForecastDayEntity::class,
         HourlyWeatherEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 
 )

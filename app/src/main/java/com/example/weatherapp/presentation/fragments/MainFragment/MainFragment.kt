@@ -1,7 +1,6 @@
 package com.example.weatherapp.presentation.fragments.MainFragment
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -123,7 +122,6 @@ class MainFragment : Fragment() {
 
     }
 
-
     private fun checkLocation() {
         if (!locationProvider.hasLocationPermission()) {
             requestLocationPermission()
@@ -137,7 +135,11 @@ class MainFragment : Fragment() {
                 onError = {
                     // Колбэк асинхронный: фрагмент мог уже отсоединиться, поэтому context?
                     context?.let {
-                        Toast.makeText(it, "Не удалось определить местоположение", Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            it,
+                            "Не удалось определить местоположение",
+                            Toast.LENGTH_SHORT
+                        )
                             .show()
                     }
 
@@ -153,38 +155,32 @@ class MainFragment : Fragment() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateCurrentCard() = with(binding) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainModel.uiState.collect { uiState ->
-                    val tempMaxMin =
-                        "${uiState.currentData.maxTemp}/${uiState.currentData.minTemp}°C"
-                    tvCity.text = uiState.currentData.localName
-                    tvData.text = uiState.currentData.time
-                    tvCondition.text = fixRus.getWeatherDescription(uiState.currentData.condition)
-                    when (uiState.currentData.currentTemp) {
-                        "" -> {
-                            tvTemp.text = tempMaxMin
-                            tvMaxMin.visibility = View.INVISIBLE
-                        }
+                    val card = uiState.currentCard
 
-                        else -> {
-                            tvTemp.text = "${uiState.currentData.currentTemp}°C"
-                            tvMaxMin.visibility = View.VISIBLE
-                            tvMaxMin.text = tempMaxMin
-                        }
+                    tvCity.text = card.cityName
+                    tvData.text = card.dateText
+                    tvCondition.text = fixRus.getWeatherDescription(card.conditionText)
+                    tvTemp.text = card.tempText
+                    tvMaxMin.text = card.maxMinText
+                    tvMaxMin.visibility = if (card.showMaxMin) View.VISIBLE else View.INVISIBLE
+                    if (card.iconUrl.isNotEmpty()) {
+                        Picasso.get().load(card.iconUrl).into(imWeather)
                     }
-                    tvMaxMin.text = tempMaxMin
-                    Picasso.get().load("https:" + uiState.currentData.imageUrl).into(imWeather)
+
                     uiState.error?.let { message ->
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         mainModel.onEvent(MainFragmentUiEvent.ErrorShow)
                     }
 
+
                 }
             }
         }
+
     }
 
     override fun onDestroyView() {

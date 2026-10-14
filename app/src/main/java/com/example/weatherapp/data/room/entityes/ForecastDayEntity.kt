@@ -3,9 +3,10 @@ package com.example.weatherapp.data.room.entityes
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+
 @Entity(
     tableName = "forecast_days",
-    primaryKeys = ["cityCoordinates","date"],
+    primaryKeys = ["cityCoordinates", "date"],
     foreignKeys = [
         ForeignKey(
             entity = CurrentWeatherEntity::class,
@@ -18,11 +19,10 @@ import androidx.room.Index
 )
 data class ForecastDayEntity(
     val cityCoordinates: String,
-    val localName: String,
     val date: String,
-    val condition: String,
-    val imageUrl: String,
-    val currentTemp: String,
-    val maxTemp: String,
-    val minTemp: String
+    val conditionText: String,
+    val conditionCode: Int,
+    val iconUrl: String,
+    val maxTempC: Double,
+    val minTempC: Double
 )

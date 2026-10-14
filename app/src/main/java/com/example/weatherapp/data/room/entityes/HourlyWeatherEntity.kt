@@ -6,7 +6,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "hourly_weather",
-    primaryKeys = ["cityCoordinates", "hour"],
+    primaryKeys = ["cityCoordinates", "time"],
     foreignKeys = [
         ForeignKey(
             entity = CurrentWeatherEntity::class,
@@ -19,9 +19,9 @@ import androidx.room.Index
 )
 data class HourlyWeatherEntity(
     val cityCoordinates: String,
-    val localName: String,
-    val hour: String,        // это DTO.time для почасового элемента
-    val condition: String,
-    val imageUrl: String,
-    val temp: String         // это DTO.currentTemp
+    val time: String,             // "yyyy-MM-dd HH:mm"
+    val conditionText: String,
+    val conditionCode: Int,
+    val iconUrl: String,
+    val tempC: Double
 )

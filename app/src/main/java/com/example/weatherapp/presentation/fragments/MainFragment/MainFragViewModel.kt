@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.error.AppError
-import com.example.weatherapp.domain.models.DayItem
+import com.example.weatherapp.domain.models.CurrentWeather
 import com.example.weatherapp.domain.useCases.GetCurrentWeatherUseCase
 import com.example.weatherapp.domain.useCases.RefreshWeatherUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
+import com.example.weatherapp.presentation.mappers.toCardUi
+import com.example.weatherapp.presentation.models.CurrentCardUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -31,20 +33,12 @@ class MainFragViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private var currentCity: String? = null
     private var collectJob: Job? = null
-    private var todayWeather: DayItem? = null
+    private var todayWeather: CurrentWeather? = null
 
     init {
         viewModelScope.launch {
-            selectedDayHolder.selectedDay.collect { day ->
-                _uiState.update { state ->
-                    if (day == null) { // Ничего не выбрано → показываем текущую погоду
-                        state.copy(currentData = todayWeather ?: DayItem())
-                    } else { // Выбран день → показываем его
-                        state.copy(currentData = day)
-                    }
-                }
-
-
+            selectedDayHolder.selectedDay.collect {
+                updateCard()
             }
         }
     }
@@ -74,21 +68,23 @@ class MainFragViewModel @Inject constructor(
         collectJob?.cancel()
         collectJob = viewModelScope.launch {
             getCurrentWeatherUseCase(city).collect { current ->
-                // обновляем currentData только если день не выбран
                 todayWeather = current
-                android.util.Log.d(
-                    "WeatherDebug",
-                    "UI получил current: ${current.cityCoordinates}, temp=${current.currentTemp}"
-                )
-                if (selectedDayHolder.selectedDay.value == null) {
-                    _uiState.update { it.copy(currentData = current, city = city) }
-                } else {
-                    _uiState.update { it.copy(city = city) }// city всё равно обновляем
-                }
-
+               _uiState.update { it.copy(city = city) }
+                updateCard()
 
             }
         }
+    }
+    // Карточка: выбран день → показываем его, иначе — текущую погоду.
+    // Название города берём из текущей погоды: в прогнозе по дням его нет.
+    private fun updateCard() {
+        val selectedDay = selectedDayHolder.selectedDay.value
+        val card = when {
+            selectedDay != null -> selectedDay.toCardUi(todayWeather?.cityName.orEmpty())
+            todayWeather != null -> todayWeather!!.toCardUi()
+            else -> CurrentCardUi()
+        }
+        _uiState.update { it.copy(currentCard = card) }
     }
 
     private fun refresh(city: String) {
