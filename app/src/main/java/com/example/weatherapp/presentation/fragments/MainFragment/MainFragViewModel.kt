@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.error.AppError
-import com.example.weatherapp.domain.models.CurrentWeather
 import com.example.weatherapp.domain.useCases.GetCurrentWeatherUseCase
+import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
 import com.example.weatherapp.domain.useCases.RefreshWeatherUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
@@ -14,9 +14,9 @@ import com.example.weatherapp.presentation.mappers.toCardUi
 import com.example.weatherapp.presentation.models.CurrentCardUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +25,7 @@ import javax.inject.Inject
 class MainFragViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val getCurrentWeatherUseCase: GetCurrentWeatherUseCase,
+    private val getForecastWeatherUseCase: GetForecastWeatherUseCase,// <--- НУЖЕН, ЧТОБЫ ИСКАТЬ ДЕНЬ ПО ДАТЕ
     private val refreshWeatherUseCase: RefreshWeatherUseCase,
     private val selectedDayHolder: SelectedDayHolder,
     private val cityHolder: CityHolder
@@ -32,16 +33,6 @@ class MainFragViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState = _uiState.asStateFlow()
     private var currentCity: String? = null
-    private var collectJob: Job? = null
-    private var todayWeather: CurrentWeather? = null
-
-    init {
-        viewModelScope.launch {
-            selectedDayHolder.selectedDay.collect {
-                updateCard()
-            }
-        }
-    }
 
 
     fun onEvent(event: MainFragmentUiEvent) {
@@ -64,38 +55,50 @@ class MainFragViewModel @Inject constructor(
         }
     }
 
-    private fun observeCurrent(city: String) {
-        collectJob?.cancel()
-        collectJob = viewModelScope.launch {
-            getCurrentWeatherUseCase(city).collect { current ->
-                todayWeather = current
-               _uiState.update { it.copy(city = city) }
-                updateCard()
+    private fun observeWeather(city: String) {
+        viewModelScope.launch {
+            // combine следит за тремя потоками одновременно
+            combine(
+                getCurrentWeatherUseCase(city),// 1. Погода сейчас
+                getForecastWeatherUseCase(city),// 2. Список дней
+                selectedDayHolder.selectedDay// 3. Выбранная дата
+            ) { current, forecast, selectedDate ->
+                // Если дата выбрана, ищем этот день в прогнозе (совпадает ли дата)
+                val selectedDay = forecast.firstOrNull { it.date == selectedDate }
+                // Собираем карточку в зависимости от того, что есть
+                val card = when {
+                    // Если день выбран — берем данные дня, а имя города из текущей погоды
+                    selectedDay != null -> selectedDay.toCardUi(current?.cityName.orEmpty())
+                    // Если день не выбран, но есть текущая погода — показываем её
+                    current != null -> current.toCardUi()
+                    // Если вообще ничего нет — пустая карточка
+                    else -> CurrentCardUi()
+                }
+                card // Возвращаем готовую карточку
+            }.collect { card ->
+                // Обновляем экран
+                _uiState.update { it.copy(currentCard = card, city = city) }
 
             }
         }
+
+
     }
-    // Карточка: выбран день → показываем его, иначе — текущую погоду.
-    // Название города берём из текущей погоды: в прогнозе по дням его нет.
-    private fun updateCard() {
-        val selectedDay = selectedDayHolder.selectedDay.value
-        val card = when {
-            selectedDay != null -> selectedDay.toCardUi(todayWeather?.cityName.orEmpty())
-            todayWeather != null -> todayWeather!!.toCardUi()
-            else -> CurrentCardUi()
-        }
-        _uiState.update { it.copy(currentCard = card) }
-    }
+
 
     private fun refresh(city: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
-            refreshWeatherUseCase(city)
-                .onFailure { e ->
-                    _uiState.update { it.copy(error = e.toUserMessage( )) }
-
-
+            try {
+                val result = refreshWeatherUseCase(city)
+                result.onFailure { e ->
+                    _uiState.update { it.copy(error = e.toUserMessage()) }
                 }
+            } finally {
+                _uiState.update { it.copy(isRefreshing = false) }
+            }
+
+
         }
     }
 
@@ -113,7 +116,8 @@ class MainFragViewModel @Inject constructor(
     private fun loadWeather(city: String) {
         currentCity = city
         cityHolder.set(city)
-        observeCurrent(city)
+        selectedDayHolder.clear()// <--- СБРАСЫВАЕМ СТАРУЮ ДАТУ ПРИ СМЕНЕ ГОРОДА
+        observeWeather(city)// <--- ЗАПУСКАЕМ НОВЫЙ КОНВЕЙЕР
         refresh(city)
     }
 

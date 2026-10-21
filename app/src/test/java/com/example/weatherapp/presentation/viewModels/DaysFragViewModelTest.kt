@@ -83,7 +83,7 @@ class DaysFragViewModelTest {
 
         viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(tomorrow.date.toString()))
 
-        assertEquals(tomorrow, selectedDayHolder.selectedDay.value)
+        assertEquals(tomorrow.date, selectedDayHolder.selectedDay.value)
     }
 
     @Test
@@ -92,7 +92,7 @@ class DaysFragViewModelTest {
         val viewModel = createViewModel()
         cityHolder.set("Moscow")
         advanceUntilIdle()
-        selectedDayHolder.select(tomorrow)
+        selectedDayHolder.select(tomorrow.date)
 
         viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(today.date.toString()))
 

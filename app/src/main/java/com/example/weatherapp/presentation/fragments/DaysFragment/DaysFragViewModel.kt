@@ -47,7 +47,7 @@ class DaysFragViewModel @Inject constructor(
                 if (isToday) {
                     selectedDayHolder.clear()
                 } else {
-                    selectedDayHolder.select(day)
+                    selectedDayHolder.select(day.date)
                 }
             }
 

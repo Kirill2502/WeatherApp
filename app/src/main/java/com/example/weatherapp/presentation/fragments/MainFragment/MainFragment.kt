@@ -170,6 +170,7 @@ class MainFragment : Fragment() {
                     if (card.iconUrl.isNotEmpty()) {
                         Picasso.get().load(card.iconUrl).into(imWeather)
                     }
+                    progressBar.visibility = if (uiState.isRefreshing) View.VISIBLE else View.GONE
 
                     uiState.error?.let { message ->
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()

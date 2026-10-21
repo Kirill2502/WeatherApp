@@ -17,7 +17,7 @@ private val TIME_FORMATE: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm
 fun Double.toTempText(): String = "${roundToInt()}°C"
 
 private fun maxMinText(max: Double?, min: Double?): String =
-    if (max == null || min == null) "" else "${min.toTempText()}/${max.toTempText()}"
+    if (max == null || min == null) "" else "${min.roundToInt()}°/${max.toTempText()}"
 
 fun DailyForecast.toListItem() = WeatherListItemUi(
     id = date.toString(),

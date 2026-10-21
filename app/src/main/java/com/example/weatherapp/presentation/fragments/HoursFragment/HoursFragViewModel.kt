@@ -2,73 +2,36 @@ package com.example.weatherapp.presentation.fragments.HoursFragment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.domain.models.DailyForecast
-import com.example.weatherapp.domain.models.HourlyForecast
-import com.example.weatherapp.domain.useCases.GetHoursWeatherUseCase
+import com.example.weatherapp.domain.useCases.GetHoursForDayUseCase
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import com.example.weatherapp.presentation.mappers.toListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HoursFragViewModel @Inject constructor(
-    private val getHoursWeatherUseCase: GetHoursWeatherUseCase,
-    private val cityHolder: CityHolder,
-    private val selectedDayHolder: SelectedDayHolder,
-
-    ) : ViewModel() {
-    private val _uiState = MutableStateFlow(HoursUiState())
-    val uiState = _uiState.asStateFlow()
-    private var collectJob: Job? = null
-    private var allHours: List<HourlyForecast> = emptyList() // ← кэш ВСЕХ часов
+    cityHolder: CityHolder,
+    selectedDayHolder: SelectedDayHolder,
+    private val getHoursForDayUseCase: GetHoursForDayUseCase
+) : ViewModel() {
 
 
-    init {
-        viewModelScope.launch {
-            cityHolder.currentCity.collect { currentCity ->
-                if (currentCity.isNotEmpty()) {
-                    observeHours(currentCity)
-                }
-
-            }
-        }
-        viewModelScope.launch {
-            selectedDayHolder.selectedDay.collect { day ->
-                filterHoursByDay(day)
-
-            }
-        }
-    }
-
-    private fun filterHoursByDay(day: DailyForecast?) {
-        val filtered = if (day == null) {
-            // Ничего не выбрано → показываем первые 24 часа (сегодня)
-            allHours.take(24)
-        } else {
-            // День выбран → фильтруем часы по дате (сравниваем даты, а не строки)
-            allHours.filter { it.time.toLocalDate() == day.date }
-        }
-        _uiState.update {
-            it.copy(hoursListData = filtered.map { hour -> hour.toListItem() })
-        }
-    }
-
-    private fun observeHours(city: String) {
-        collectJob?.cancel()
-        collectJob = viewModelScope.launch {
-            getHoursWeatherUseCase(city).collect { hours ->
-                allHours = hours// ← сохранили
-                filterHoursByDay(selectedDayHolder.selectedDay.value)
-            }
-        }
-    }
-
+    val uiState: StateFlow<HoursUiState> =
+        combine(cityHolder.currentCity.filter {
+            it.isNotEmpty()
+        }, selectedDayHolder.selectedDay) { city, date -> city to date }
+            .flatMapLatest { (city, date) -> getHoursForDayUseCase(city, date) }
+            .map { hours -> HoursUiState(hoursListData = hours.map { it.toListItem() }) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HoursUiState())
 
 
 }

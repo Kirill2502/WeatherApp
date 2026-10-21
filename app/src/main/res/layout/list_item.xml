@@ -6,8 +6,9 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="3dp"
     android:backgroundTint="@color/card_blue"
+    android:paddingEnd="10dp"
     app:cardCornerRadius="6dp"
-    app:cardElevation="1dp">
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -57,10 +58,11 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:fontFamily="serif"
-            android:gravity="center"
+            android:gravity="center|right"
+            android:paddingEnd="5dp"
             android:text="25°C"
             android:textColor="@color/white"
-            android:textSize="24sp"
+            android:textSize="30sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imItem"
             app:layout_constraintStart_toEndOf="@+id/tvDateItem"

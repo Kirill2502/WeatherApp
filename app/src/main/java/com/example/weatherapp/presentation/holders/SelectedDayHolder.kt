@@ -1,9 +1,8 @@
 package com.example.weatherapp.presentation.holders
 
-import com.example.weatherapp.domain.models.CurrentWeather
-import com.example.weatherapp.domain.models.DailyForecast
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,12 +10,13 @@ import javax.inject.Singleton
 
 @Singleton
 class SelectedDayHolder @Inject constructor() {
-    private val _selectedDay = MutableStateFlow<DailyForecast?>(null)
+    private val _selectedDay = MutableStateFlow<LocalDate?>(null)
     val selectedDay = _selectedDay.asStateFlow()
-    fun select(day: DailyForecast) {
-        _selectedDay.value = day
+    fun select(date: LocalDate) {
+        _selectedDay.value = date
     }
-    fun clear(){
+
+    fun clear() {
         _selectedDay.value = null
     }
 }
