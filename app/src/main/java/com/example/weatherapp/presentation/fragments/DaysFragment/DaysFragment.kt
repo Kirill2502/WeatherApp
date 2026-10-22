@@ -13,10 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.databinding.FragmentDaysBinding
 import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
 import com.example.weatherapp.presentation.models.WeatherListItemUi
-import com.example.weatherapp.utils.FixRus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
@@ -25,8 +23,6 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
     private lateinit var adapter: RecyclerWeatherAdapter
     private val model: DaysFragViewModel by activityViewModels()
 
-    @Inject
-    lateinit var fixRus: FixRus
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +47,7 @@ class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
 
     private fun initDaysAdapter() = with(binding) {
         rcDays.layoutManager = LinearLayoutManager(activity)
-        adapter = RecyclerWeatherAdapter(this@DaysFragment, fixRus)
+        adapter = RecyclerWeatherAdapter(this@DaysFragment)
         rcDays.adapter = adapter
     }
 

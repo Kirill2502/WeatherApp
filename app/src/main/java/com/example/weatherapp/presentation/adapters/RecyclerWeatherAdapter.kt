@@ -9,17 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ListItemBinding
 import com.example.weatherapp.presentation.models.WeatherListItemUi
-import com.example.weatherapp.utils.FixRus
 import com.squareup.picasso.Picasso
 
 
 class RecyclerWeatherAdapter(
     val listener: Listener?,
-    private val fixRus: FixRus
 ) : ListAdapter<WeatherListItemUi, RecyclerWeatherAdapter.Holder>(Comparator()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
-        return Holder(view, listener, fixRus)
+        return Holder(view, listener)
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
@@ -27,7 +25,7 @@ class RecyclerWeatherAdapter(
     }
 
 
-    class Holder(view: View, val listener: Listener?, private val fixRus: FixRus) :
+    class Holder(view: View, val listener: Listener?) :
         RecyclerView.ViewHolder(view) {
         val binding = ListItemBinding.bind(view)
         var tempItem: WeatherListItemUi? = null
@@ -42,7 +40,7 @@ class RecyclerWeatherAdapter(
         fun bind(item: WeatherListItemUi) = with(binding) {
             tempItem = item
             tvDateItem.text = item.title
-            tvConditionItem.text = fixRus.getWeatherDescription(item.conditionText)
+            tvConditionItem.text = item.conditionText
             tvTempItem.text = item.tempText
             if (item.iconUrl.isNotEmpty()) Picasso.get().load(item.iconUrl).into(imItem)
 

@@ -18,12 +18,10 @@ import com.example.weatherapp.databinding.FragmentMainBinding
 import com.example.weatherapp.presentation.DialogManager
 import com.example.weatherapp.presentation.LocationProvider
 import com.example.weatherapp.presentation.adapters.VpAdapter
-import com.example.weatherapp.utils.FixRus
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainFragment : Fragment() {
@@ -57,8 +55,6 @@ class MainFragment : Fragment() {
             }
         }
 
-    @Inject
-    lateinit var fixRus: FixRus
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,6 +72,7 @@ class MainFragment : Fragment() {
 
         init()
         updateCurrentCard()
+        observeEffects()
         // Геолокацию запрашиваем только при первом запуске, когда город ещё не выбран.
         // ViewModel переживает поворот экрана, поэтому после поворота город уже есть.
         if (mainModel.uiState.value.city.isEmpty()) {
@@ -88,6 +85,8 @@ class MainFragment : Fragment() {
 
 
     }
+
+
 
     private fun init() =
         with(binding) {//функция для инициализации адаптора VpAdapter+местоположения
@@ -163,7 +162,7 @@ class MainFragment : Fragment() {
 
                     tvCity.text = card.cityName
                     tvData.text = card.dateText
-                    tvCondition.text = fixRus.getWeatherDescription(card.conditionText)
+                    tvCondition.text = card.conditionText
                     tvTemp.text = card.tempText
                     tvMaxMin.text = card.maxMinText
                     tvMaxMin.visibility = if (card.showMaxMin) View.VISIBLE else View.INVISIBLE
@@ -172,16 +171,24 @@ class MainFragment : Fragment() {
                     }
                     progressBar.visibility = if (uiState.isRefreshing) View.VISIBLE else View.GONE
 
-                    uiState.error?.let { message ->
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                        mainModel.onEvent(MainFragmentUiEvent.ErrorShow)
-                    }
-
 
                 }
             }
         }
 
+    }
+    private fun observeEffects() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                mainModel.effect.collect {effect->
+                    when(effect){
+                        is MainFragmentUiEffect.ShowError->
+                            Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {

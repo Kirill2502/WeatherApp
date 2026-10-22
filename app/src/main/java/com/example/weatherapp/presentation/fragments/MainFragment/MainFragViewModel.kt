@@ -14,9 +14,11 @@ import com.example.weatherapp.presentation.mappers.toCardUi
 import com.example.weatherapp.presentation.models.CurrentCardUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,6 +34,10 @@ class MainFragViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState = _uiState.asStateFlow()
+    // Channel доставит каждый эффект ровно один раз.
+// Если хранить ошибку в состоянии, после поворота экрана Toast показался бы снова.
+    private val _effect = Channel<MainFragmentUiEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
     private var currentCity: String? = null
 
 
@@ -49,9 +55,6 @@ class MainFragViewModel @Inject constructor(
                 loadWeather(event.coords)
             }
 
-            is MainFragmentUiEvent.ErrorShow -> {
-                _uiState.update { it.copy(error = null) }
-            }
         }
     }
 
@@ -92,7 +95,7 @@ class MainFragViewModel @Inject constructor(
             try {
                 val result = refreshWeatherUseCase(city)
                 result.onFailure { e ->
-                    _uiState.update { it.copy(error = e.toUserMessage()) }
+                    _effect.send(MainFragmentUiEffect.ShowError(e.toUserMessage()))
                 }
             } finally {
                 _uiState.update { it.copy(isRefreshing = false) }

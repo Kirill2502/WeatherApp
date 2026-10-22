@@ -22,7 +22,7 @@ fun WeatherResponseDTO.toEntities(city: String, updatedAt: Long): WeatherEntitie
         cityName = location.name,
         updatedAt = updatedAt,
         lastUpdated = current.lastUpdated,
-        conditionText = current.condition.text.fixEncoding(),
+        conditionText = current.condition.text,
         conditionCode = current.condition.code,
         iconUrl = current.condition.toIconUrl(),
         tempC = current.tempC,
@@ -36,7 +36,7 @@ fun WeatherResponseDTO.toEntities(city: String, updatedAt: Long): WeatherEntitie
         ForecastDayEntity(
             cityCoordinates = city,
             date = day.date,
-            conditionText = day.day.condition.text.fixEncoding(),
+            conditionText = day.day.condition.text,
             conditionCode = day.day.condition.code,
             iconUrl = day.day.condition.toIconUrl(),
             maxTempC = day.day.maxTempC,
@@ -51,7 +51,7 @@ fun WeatherResponseDTO.toEntities(city: String, updatedAt: Long): WeatherEntitie
             HourlyWeatherEntity(
                 cityCoordinates = city,
                 time = hour.time,
-                conditionText = hour.condition.text.fixEncoding(),
+                conditionText = hour.condition.text,
                 conditionCode = hour.condition.code,
                 iconUrl = hour.condition.toIconUrl(),
                 tempC = hour.tempC
@@ -65,7 +65,6 @@ fun WeatherResponseDTO.toEntities(city: String, updatedAt: Long): WeatherEntitie
 // чтобы остальные слои не знали об этой особенности API
 private fun ConditionDTO.toIconUrl(): String =
     if (icon.startsWith("//")) "https:$icon" else icon
-internal fun String.fixEncoding(): String =
-    String(toByteArray(Charsets.ISO_8859_1), Charsets.UTF_8)
+
 
 

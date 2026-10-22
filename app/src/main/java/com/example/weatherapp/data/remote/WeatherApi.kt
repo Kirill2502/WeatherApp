@@ -11,6 +11,7 @@ interface WeatherApi {
         @Query("q") city: String,
         @Query("days") days: Int = 3,
         @Query("aqi") aqi: String = "no",
-        @Query("alerts") alerts: String = "no"
+        @Query("alerts") alerts: String = "no",
+        @Query("lang") lang: String = "ru"
     ): WeatherResponseDTO
 }

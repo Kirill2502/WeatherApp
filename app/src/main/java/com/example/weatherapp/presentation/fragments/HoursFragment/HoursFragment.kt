@@ -12,10 +12,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.databinding.FragmentHoursBinding
 import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
-import com.example.weatherapp.utils.FixRus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HoursFragment : Fragment() {
@@ -25,8 +23,7 @@ class HoursFragment : Fragment() {
     private lateinit var adapter: RecyclerWeatherAdapter
     private val model: HoursFragViewModel by activityViewModels()
 
-    @Inject
-    lateinit var fixRus: FixRus
+
 
 
     override fun onCreateView(
@@ -57,7 +54,7 @@ class HoursFragment : Fragment() {
 
     private fun initRcView() = with(binding) {
         rcViewHousr.layoutManager = LinearLayoutManager(activity)
-        adapter = RecyclerWeatherAdapter(null, fixRus)
+        adapter = RecyclerWeatherAdapter(null)
         rcViewHousr.adapter = adapter
 
     }
