@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.error.AppError
+import com.example.weatherapp.domain.location.LocationResult
+import com.example.weatherapp.domain.location.LocationTracker
 import com.example.weatherapp.domain.useCases.GetCurrentWeatherUseCase
 import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
 import com.example.weatherapp.domain.useCases.RefreshWeatherUseCase
@@ -30,19 +32,33 @@ class MainFragViewModel @Inject constructor(
     private val getForecastWeatherUseCase: GetForecastWeatherUseCase,// <--- НУЖЕН, ЧТОБЫ ИСКАТЬ ДЕНЬ ПО ДАТЕ
     private val refreshWeatherUseCase: RefreshWeatherUseCase,
     private val selectedDayHolder: SelectedDayHolder,
-    private val cityHolder: CityHolder
+    private val cityHolder: CityHolder,
+    private val locationTracker: LocationTracker
+
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState = _uiState.asStateFlow()
+
     // Channel доставит каждый эффект ровно один раз.
 // Если хранить ошибку в состоянии, после поворота экрана Toast показался бы снова.
-    private val _effect = Channel<MainFragmentUiEffect>(Channel.BUFFERED)
-    val effect = _effect.receiveAsFlow()
+    private val _effects = Channel<MainFragmentUiEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
     private var currentCity: String? = null
+
+    //Это защита от повторного запроса GPS при повороте экрана.
+    private var initialLoadRequested = false
 
 
     fun onEvent(event: MainFragmentUiEvent) {
         when (event) {
+            is MainFragmentUiEvent.ScreenOpened -> {
+                // Геолокацию запрашиваем только один раз — при первом открытии экрана
+                if (!initialLoadRequested) {
+                    initialLoadRequested = true
+                    loadWeatherByLocation(askToEnableLocation = true)
+                }
+            }
+
             is MainFragmentUiEvent.LoadWeather -> {
                 loadWeather(event.city)
             }
@@ -50,9 +66,31 @@ class MainFragViewModel @Inject constructor(
             is MainFragmentUiEvent.RefreshWeather -> {
                 currentCity?.let { refresh(it) }//добавить обновление по свайпу вниз!
             }
+            //Это событие прилетает, когда пользователь нажал на кнопку синхронизации,
+            // или вернулся из настроек, или только что выдал разрешение.
+            is MainFragmentUiEvent.LoadWeatherByLocation -> {
+                loadWeatherByLocation(event.askToEnableLocation)
+            }
 
-            is MainFragmentUiEvent.LoadWeatherCoord -> {
-                loadWeather(event.coords)
+
+        }
+    }
+
+    private fun loadWeatherByLocation(askToEnableLocation: Boolean) {
+        viewModelScope.launch {
+            when (val result = locationTracker.getCurrentLocation()) {
+                is LocationResult.Success -> loadWeather(result.coordinates.toQuery())
+
+                LocationResult.PermissionDenied ->
+                    _effects.send(MainFragmentUiEffect.RequestLocationPermission)
+
+                LocationResult.LocationDisabled ->
+                    if (askToEnableLocation) {
+                        _effects.send(MainFragmentUiEffect.ShowLocationDisabledDialog)
+                    }
+
+                LocationResult.Error ->
+                    _effects.send(MainFragmentUiEffect.ShowError("Не удалось определить местоположение"))
             }
 
         }
@@ -81,7 +119,6 @@ class MainFragViewModel @Inject constructor(
             }.collect { card ->
                 // Обновляем экран
                 _uiState.update { it.copy(currentCard = card, city = city) }
-
             }
         }
 
@@ -95,7 +132,7 @@ class MainFragViewModel @Inject constructor(
             try {
                 val result = refreshWeatherUseCase(city)
                 result.onFailure { e ->
-                    _effect.send(MainFragmentUiEffect.ShowError(e.toUserMessage()))
+                    _effects.send(MainFragmentUiEffect.ShowError(e.toUserMessage()))
                 }
             } finally {
                 _uiState.update { it.copy(isRefreshing = false) }

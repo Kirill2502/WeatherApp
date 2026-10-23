@@ -16,7 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.weatherapp.databinding.FragmentMainBinding
 import com.example.weatherapp.presentation.DialogManager
-import com.example.weatherapp.presentation.LocationProvider
 import com.example.weatherapp.presentation.adapters.VpAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
@@ -28,7 +27,6 @@ class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    private lateinit var locationProvider: LocationProvider
     private val tList = listOf("ЧАСЫ", "ДНИ")
     private val mainModel: MainFragViewModel by activityViewModels()
 
@@ -37,7 +35,8 @@ class MainFragment : Fragment() {
     private val pLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->// Достаточно любого разрешения: точного (FINE) или приблизительного (COARSE)
             if (result.values.any { it }) {
-                checkLocation()// разрешение выдали — сразу грузим погоду
+                // разрешение выдали — сразу грузим погоду
+                mainModel.onEvent(MainFragmentUiEvent.LoadWeatherByLocation())
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -47,12 +46,10 @@ class MainFragment : Fragment() {
             }
         }
 
-    // Возврат из настроек GPS: если пользователь включил GPS — грузим погоду
+    // Возврат из настроек геолокации: пробуем ещё раз, но диалог повторно не показываем
     private val gpsSettingsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (locationProvider.isLocationEnabled()) {
-                checkLocation()
-            }
+            mainModel.onEvent(MainFragmentUiEvent.LoadWeatherByLocation(askToEnableLocation = false))
         }
 
 
@@ -73,30 +70,18 @@ class MainFragment : Fragment() {
         init()
         updateCurrentCard()
         observeEffects()
-        // Геолокацию запрашиваем только при первом запуске, когда город ещё не выбран.
-        // ViewModel переживает поворот экрана, поэтому после поворота город уже есть.
-        if (mainModel.uiState.value.city.isEmpty()) {
-            if (locationProvider.hasLocationPermission()) {
-                checkLocation()
-            } else {
-                requestLocationPermission()
-            }
-        }
-
-
+        mainModel.onEvent(MainFragmentUiEvent.ScreenOpened)
     }
 
 
-
     private fun init() =
-        with(binding) {//функция для инициализации адаптора VpAdapter+местоположения
-            locationProvider = LocationProvider(requireContext())
+        with(binding) {//функция для инициализации адаптора VpAdapter и кнопок
             vp.adapter = VpAdapter(this@MainFragment)
             TabLayoutMediator(tabLayout, vp) { tab, pos ->
                 tab.text = tList[pos]
             }.attach()
             ibSync.setOnClickListener {//обновление местоположения по нажатию кнопки
-                checkLocation()
+                mainModel.onEvent(MainFragmentUiEvent.LoadWeatherByLocation())
                 tabLayout.selectTab(tabLayout.getTabAt(0))//переброс на первый таб
             }
             ibSearch.setOnClickListener {
@@ -118,41 +103,16 @@ class MainFragment : Fragment() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
-
     }
 
-    private fun checkLocation() {
-        if (!locationProvider.hasLocationPermission()) {
-            requestLocationPermission()
-        } else if (locationProvider.isLocationEnabled()) {
-            locationProvider.getCurrentCoordinates(
-                onResult = { coords ->
-                    mainModel
-                        .onEvent(MainFragmentUiEvent.LoadWeatherCoord(coords))
-
-                },
-                onError = {
-                    // Колбэк асинхронный: фрагмент мог уже отсоединиться, поэтому context?
-                    context?.let {
-                        Toast.makeText(
-                            it,
-                            "Не удалось определить местоположение",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
-
-                }
-            )
-        } else {
-            DialogManager.showGpsDisabledDialog(requireContext(), object : DialogManager.Listener {
-                override fun onClick(name: String?) {
-                    gpsSettingsLauncher.launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }
-
-            })
-        }
+    private fun showLocationDisabledDialog() {
+        DialogManager.showGpsDisabledDialog(requireContext(), object : DialogManager.Listener {
+            override fun onClick(name: String?) {
+                gpsSettingsLauncher.launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+            }
+        })
     }
+
 
     private fun updateCurrentCard() = with(binding) {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -177,13 +137,17 @@ class MainFragment : Fragment() {
         }
 
     }
+
     private fun observeEffects() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
-                mainModel.effect.collect {effect->
-                    when(effect){
-                        is MainFragmentUiEffect.ShowError->
-                            Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT).show()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainModel.effects.collect { effect ->
+                    when (effect) {
+                        is MainFragmentUiEffect.ShowError ->
+                            Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT)
+                                .show()
+                        is MainFragmentUiEffect.RequestLocationPermission -> requestLocationPermission()
+                        is MainFragmentUiEffect.ShowLocationDisabledDialog -> showLocationDisabledDialog()
                     }
 
                 }
