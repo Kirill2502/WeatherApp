@@ -3,9 +3,9 @@ package com.example.weatherapp.data.room.weatherDataBase
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.weatherapp.data.room.dao.WeatherDao
-import com.example.weatherapp.data.room.entityes.CurrentWeatherEntity
-import com.example.weatherapp.data.room.entityes.ForecastDayEntity
-import com.example.weatherapp.data.room.entityes.HourlyWeatherEntity
+import com.example.weatherapp.data.room.entities.CurrentWeatherEntity
+import com.example.weatherapp.data.room.entities.ForecastDayEntity
+import com.example.weatherapp.data.room.entities.HourlyWeatherEntity
 
 @Database(
     entities = [

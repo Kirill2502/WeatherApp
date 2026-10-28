@@ -1,15 +1,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">WeatherApp</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="gps_disabled_title">location notification</string>
-    <string name="gps_disabled_message">GPS is disabled on your device, connection required</string>
-    <string name="enable_gps">connect</string>
-    <string name="cancel" tools:ignore="ButtonCase">cancel</string>
+
+    <!-- Вкладки -->
+    <string name="tab_hours">ЧАСЫ</string>
+    <string name="tab_days">ДНИ</string>
+
+    <!-- Диалоги -->
+    <string name="gps_disabled_title">Уведомление геолокации</string>
+    <string name="gps_disabled_message">Геолокация отключена на вашем устройстве, требуется подключение!</string>
+    <string name="enable_gps">Включить</string>
+    <string name="cancel" tools:ignore="ButtonCase">Отмена</string>
+    <string name="search_city_title">Название города:</string>
+    <string name="ok">OK</string>
+
+    <!-- Сообщения -->
+    <string name="location_permission_denied">Без геолокации используйте поиск города</string>
+    <string name="error_location">Не удалось определить местоположение</string>
     <string name="error_network">Нет подключения к интернету</string>
     <string name="error_parsing">Не удалось обработать данные</string>
-    <string name="error_server">Ошибка сервера: %d</string>
+    <string name="error_server">Ошибка сервера</string>
     <string name="error_database">Ошибка базы данных</string>
     <string name="error_unknown">Что-то пошло не так</string>
     <string name="error_else">Ошибка обновления</string>
+    <string name="no_data">Нет данных</string>
 </resources>

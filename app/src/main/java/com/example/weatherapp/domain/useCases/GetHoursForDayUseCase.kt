@@ -1,7 +1,7 @@
 package com.example.weatherapp.domain.useCases
 
 import com.example.weatherapp.domain.models.HourlyForecast
-import com.example.weatherapp.domain.repository.Repository
+import com.example.weatherapp.domain.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 // Бизнес-правило "какие часы показывать" живёт в domain, а не во ViewModel
 class GetHoursForDayUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: WeatherRepository
 ) {
     operator fun invoke(city: String, date: LocalDate?): Flow<List<HourlyForecast>> =
         repository.getWeather(city).map { weather ->

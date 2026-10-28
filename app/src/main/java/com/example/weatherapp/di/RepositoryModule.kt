@@ -1,7 +1,7 @@
 package com.example.weatherapp.di
 
-import com.example.weatherapp.data.repository.RepositoryImplement
-import com.example.weatherapp.domain.repository.Repository
+import com.example.weatherapp.data.repository.WeatherRepositoryImpl
+import com.example.weatherapp.domain.repository.WeatherRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -11,5 +11,5 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn( SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds
-    abstract fun bindRepository(impl: RepositoryImplement): Repository
+    abstract fun bindRepository(impl: WeatherRepositoryImpl): WeatherRepository
 }

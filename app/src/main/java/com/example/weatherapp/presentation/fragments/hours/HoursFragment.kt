@@ -1,4 +1,4 @@
-package com.example.weatherapp.presentation.fragments.DaysFragment
+package com.example.weatherapp.presentation.fragments.hours
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,62 +10,64 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weatherapp.databinding.FragmentDaysBinding
+import com.example.weatherapp.databinding.FragmentHoursBinding
 import com.example.weatherapp.presentation.adapters.RecyclerWeatherAdapter
-import com.example.weatherapp.presentation.models.WeatherListItemUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DaysFragment : Fragment(), RecyclerWeatherAdapter.Listener {
-    private var _binding: FragmentDaysBinding? = null
+class HoursFragment : Fragment() {
+    private var _binding: FragmentHoursBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var adapter: RecyclerWeatherAdapter
-    private val model: DaysFragViewModel by activityViewModels()
+    private val model: HoursFragViewModel by activityViewModels()
+
+
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentDaysBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentHoursBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initRcView()
+        observeUiState()
 
-        initDaysAdapter()
+
+    }
+
+    private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 model.uiState.collect { uiState ->
-                    adapter.submitList(uiState.forecastListData)
+                    adapter.submitList(uiState.hoursListData)
                 }
             }
         }
     }
 
-    private fun initDaysAdapter() = with(binding) {
-        rcDays.layoutManager = LinearLayoutManager(activity)
-        adapter = RecyclerWeatherAdapter(this@DaysFragment)
-        rcDays.adapter = adapter
-    }
-
-    override fun onClick(item: WeatherListItemUi) {
-        model.onEvent(DaysFragmentUiEvent.OnDaySelect(item.id))
-
-    }
-
-
-    companion object {
-
-        @JvmStatic
-        fun newInstance() = DaysFragment()
+    private fun initRcView() = with(binding) {
+        rcViewHours.layoutManager = LinearLayoutManager(activity)
+        adapter = RecyclerWeatherAdapter(null)
+        rcViewHours.adapter = adapter
 
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = HoursFragment()
+
     }
 }

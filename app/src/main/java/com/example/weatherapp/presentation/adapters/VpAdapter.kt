@@ -2,8 +2,8 @@ package com.example.weatherapp.presentation.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.weatherapp.presentation.fragments.DaysFragment.DaysFragment
-import com.example.weatherapp.presentation.fragments.HoursFragment.HoursFragment
+import com.example.weatherapp.presentation.fragments.days.DaysFragment
+import com.example.weatherapp.presentation.fragments.hours.HoursFragment
 
 class VpAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
     override fun createFragment(position: Int): Fragment {

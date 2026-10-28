@@ -1,4 +1,4 @@
-package com.example.weatherapp.presentation.fragments.MainFragment
+package com.example.weatherapp.presentation.fragments.main
 
 import com.example.weatherapp.presentation.models.CurrentCardUi
 

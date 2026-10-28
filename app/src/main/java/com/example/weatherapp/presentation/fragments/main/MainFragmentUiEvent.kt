@@ -1,4 +1,4 @@
-package com.example.weatherapp.presentation.fragments.MainFragment
+package com.example.weatherapp.presentation.fragments.main
 
 sealed interface MainFragmentUiEvent {
     // Экран открыт. ViewModel сама решит, нужна ли первая загрузка по геолокации

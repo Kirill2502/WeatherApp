@@ -1,4 +1,4 @@
-package com.example.weatherapp.presentation.fragments.DaysFragment
+package com.example.weatherapp.presentation.fragments.days
 
 import com.example.weatherapp.presentation.models.WeatherListItemUi
 

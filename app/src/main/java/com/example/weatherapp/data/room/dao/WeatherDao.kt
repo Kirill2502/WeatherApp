@@ -6,9 +6,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.example.weatherapp.data.room.WeatherWithDetails
-import com.example.weatherapp.data.room.entityes.CurrentWeatherEntity
-import com.example.weatherapp.data.room.entityes.ForecastDayEntity
-import com.example.weatherapp.data.room.entityes.HourlyWeatherEntity
+import com.example.weatherapp.data.room.entities.CurrentWeatherEntity
+import com.example.weatherapp.data.room.entities.ForecastDayEntity
+import com.example.weatherapp.data.room.entities.HourlyWeatherEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

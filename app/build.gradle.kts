@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.gson)
+    implementation(libs.androidx.swiperefreshlayout)
 
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

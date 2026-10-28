@@ -7,7 +7,7 @@ import com.example.weatherapp.data.remote.WeatherRemoteDataSource
 import com.example.weatherapp.data.room.dao.WeatherDao
 import com.example.weatherapp.domain.error.AppError
 import com.example.weatherapp.domain.models.WeatherResult
-import com.example.weatherapp.domain.repository.Repository
+import com.example.weatherapp.domain.repository.WeatherRepository
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -18,10 +18,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RepositoryImplement @Inject constructor(
+class WeatherRepositoryImpl @Inject constructor(
     private val remoteData: WeatherRemoteDataSource,
     private val weatherDao: WeatherDao
-) : Repository {
+) : WeatherRepository {
     override fun getWeather(city: String): Flow<WeatherResult?> =
         weatherDao.observeWeather(city)
             .map { it?.toDomain() }

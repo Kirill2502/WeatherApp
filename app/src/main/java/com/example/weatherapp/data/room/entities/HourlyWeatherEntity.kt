@@ -1,12 +1,12 @@
-package com.example.weatherapp.data.room.entityes
+package com.example.weatherapp.data.room.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    tableName = "forecast_days",
-    primaryKeys = ["cityCoordinates", "date"],
+    tableName = "hourly_weather",
+    primaryKeys = ["cityCoordinates", "time"],
     foreignKeys = [
         ForeignKey(
             entity = CurrentWeatherEntity::class,
@@ -17,12 +17,11 @@ import androidx.room.Index
     ],
     indices = [Index("cityCoordinates")]
 )
-data class ForecastDayEntity(
+data class HourlyWeatherEntity(
     val cityCoordinates: String,
-    val date: String,
+    val time: String,             // "yyyy-MM-dd HH:mm"
     val conditionText: String,
     val conditionCode: Int,
     val iconUrl: String,
-    val maxTempC: Double,
-    val minTempC: Double
+    val tempC: Double
 )

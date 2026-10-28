@@ -2,9 +2,9 @@ package com.example.weatherapp.data.room
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import com.example.weatherapp.data.room.entityes.CurrentWeatherEntity
-import com.example.weatherapp.data.room.entityes.ForecastDayEntity
-import com.example.weatherapp.data.room.entityes.HourlyWeatherEntity
+import com.example.weatherapp.data.room.entities.CurrentWeatherEntity
+import com.example.weatherapp.data.room.entities.ForecastDayEntity
+import com.example.weatherapp.data.room.entities.HourlyWeatherEntity
 
 data class WeatherWithDetails(
     @Embedded

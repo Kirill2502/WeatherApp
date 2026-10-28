@@ -3,7 +3,7 @@ package com.example.weatherapp.domain.useCases
 import com.example.weatherapp.domain.models.CurrentWeather
 import com.example.weatherapp.domain.models.HourlyForecast
 import com.example.weatherapp.domain.models.WeatherResult
-import com.example.weatherapp.domain.repository.Repository
+import com.example.weatherapp.domain.repository.WeatherRepository
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 
 class GetHoursForDayUseCaseTest {
 
-    private val repository = mockk<Repository>()
+    private val repository = mockk<WeatherRepository>()
     private val useCase = GetHoursForDayUseCase(repository)
 
     private val day1 = LocalDate.of(2026, 10, 4)

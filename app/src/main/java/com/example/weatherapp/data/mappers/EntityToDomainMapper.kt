@@ -1,9 +1,9 @@
 package com.example.weatherapp.data.mappers
 
 import com.example.weatherapp.data.room.WeatherWithDetails
-import com.example.weatherapp.data.room.entityes.CurrentWeatherEntity
-import com.example.weatherapp.data.room.entityes.ForecastDayEntity
-import com.example.weatherapp.data.room.entityes.HourlyWeatherEntity
+import com.example.weatherapp.data.room.entities.CurrentWeatherEntity
+import com.example.weatherapp.data.room.entities.ForecastDayEntity
+import com.example.weatherapp.data.room.entities.HourlyWeatherEntity
 import com.example.weatherapp.domain.models.CurrentWeather
 import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.models.HourlyForecast

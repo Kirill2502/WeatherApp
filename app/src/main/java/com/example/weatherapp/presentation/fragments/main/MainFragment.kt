@@ -1,11 +1,14 @@
-package com.example.weatherapp.presentation.fragments.MainFragment
+package com.example.weatherapp.presentation.fragments.main
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.weatherapp.R
 import com.example.weatherapp.databinding.FragmentMainBinding
 import com.example.weatherapp.presentation.DialogManager
 import com.example.weatherapp.presentation.adapters.VpAdapter
@@ -21,13 +25,14 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @AndroidEntryPoint
 class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    private val tList = listOf("ЧАСЫ", "ДНИ")
+    private val tList = listOf(R.string.tab_hours, R.string.tab_days)
     private val mainModel: MainFragViewModel by activityViewModels()
 
     // Лаунчеры регистрируем полями класса: registerForActivityResult
@@ -40,7 +45,7 @@ class MainFragment : Fragment() {
             } else {
                 Toast.makeText(
                     requireContext(),
-                    "Без геолокации используйте поиск города",
+                    R.string.location_permission_denied,
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -75,10 +80,12 @@ class MainFragment : Fragment() {
 
 
     private fun init() =
-        with(binding) {//функция для инициализации адаптора VpAdapter и кнопок
+        with(binding) {
+            setupSwipeToRefresh()
+            //функция для инициализации адаптора VpAdapter и кнопок
             vp.adapter = VpAdapter(this@MainFragment)
             TabLayoutMediator(tabLayout, vp) { tab, pos ->
-                tab.text = tList[pos]
+                tab.setText(tList[pos])
             }.attach()
             ibSync.setOnClickListener {//обновление местоположения по нажатию кнопки
                 mainModel.onEvent(MainFragmentUiEvent.LoadWeatherByLocation())
@@ -93,6 +100,55 @@ class MainFragment : Fragment() {
             }
 
         }
+
+    //обновление экрана по свайпу
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupSwipeToRefresh() {
+        val touchSlop =
+            ViewConfiguration.get(requireContext()).scaledTouchSlop
+
+        val swipeThreshold = 72 * resources.displayMetrics.density
+
+        var startX = 0f
+        var startY = 0f
+
+        binding.cardContent.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = event.rawX
+                    startY = event.rawY
+                    true
+                }
+
+                MotionEvent.ACTION_MOVE -> true
+
+                MotionEvent.ACTION_UP -> {
+                    val deltaX = event.rawX - startX
+                    val deltaY = event.rawY - startY
+
+                    val isSwipeDown =
+                        deltaY > swipeThreshold &&
+                                deltaY > touchSlop &&
+                                deltaY > abs(deltaX) * 1.5f
+
+                    if (
+                        isSwipeDown &&
+                        !mainModel.uiState.value.isRefreshing
+                    ) {
+                        mainModel.onEvent(
+                            MainFragmentUiEvent.RefreshWeather
+                        )
+                    }
+
+                    true
+                }
+
+                MotionEvent.ACTION_CANCEL -> true
+
+                else -> true
+            }
+        }
+    }
 
     // Android 12+ требует запрашивать FINE и COARSE вместе —
     // тогда пользователь сам выберет точную или приблизительную геолокацию
@@ -120,6 +176,8 @@ class MainFragment : Fragment() {
                 mainModel.uiState.collect { uiState ->
                     val card = uiState.currentCard
 
+                    progressBar.visibility =
+                        if (uiState.isRefreshing) View.VISIBLE else View.GONE
                     tvCity.text = card.cityName
                     tvData.text = card.dateText
                     tvCondition.text = card.conditionText
@@ -129,7 +187,6 @@ class MainFragment : Fragment() {
                     if (card.iconUrl.isNotEmpty()) {
                         Picasso.get().load(card.iconUrl).into(imWeather)
                     }
-                    progressBar.visibility = if (uiState.isRefreshing) View.VISIBLE else View.GONE
 
 
                 }
@@ -144,8 +201,9 @@ class MainFragment : Fragment() {
                 mainModel.effects.collect { effect ->
                     when (effect) {
                         is MainFragmentUiEffect.ShowError ->
-                            Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT)
+                            Toast.makeText(requireContext(), effect.messageRes, Toast.LENGTH_SHORT)
                                 .show()
+
                         is MainFragmentUiEffect.RequestLocationPermission -> requestLocationPermission()
                         is MainFragmentUiEffect.ShowLocationDisabledDialog -> showLocationDisabledDialog()
                     }
@@ -154,6 +212,7 @@ class MainFragment : Fragment() {
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,6 +1,6 @@
-package com.example.weatherapp.presentation.fragments.MainFragment
+package com.example.weatherapp.presentation.fragments.main
 
-import android.content.Context
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
@@ -15,7 +15,6 @@ import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import com.example.weatherapp.presentation.mappers.toCardUi
 import com.example.weatherapp.presentation.models.CurrentCardUi
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +26,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainFragViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val getCurrentWeatherUseCase: GetCurrentWeatherUseCase,
     private val getForecastWeatherUseCase: GetForecastWeatherUseCase,// <--- НУЖЕН, ЧТОБЫ ИСКАТЬ ДЕНЬ ПО ДАТЕ
     private val refreshWeatherUseCase: RefreshWeatherUseCase,
@@ -64,7 +62,9 @@ class MainFragViewModel @Inject constructor(
             }
 
             is MainFragmentUiEvent.RefreshWeather -> {
-                currentCity?.let { refresh(it) }//добавить обновление по свайпу вниз!
+                // Город ещё не выбран (например, не было разрешения) — пробуем геолокацию
+                currentCity?.let { refresh(it) }
+                    ?: loadWeatherByLocation(askToEnableLocation = true)
             }
             //Это событие прилетает, когда пользователь нажал на кнопку синхронизации,
             // или вернулся из настроек, или только что выдал разрешение.
@@ -90,7 +90,11 @@ class MainFragViewModel @Inject constructor(
                     }
 
                 LocationResult.Error ->
-                    _effects.send(MainFragmentUiEffect.ShowError("Не удалось определить местоположение"))
+                    _effects.send(
+                        MainFragmentUiEffect.ShowError(
+                            R.string.error_location
+                        )
+                    )
             }
 
         }
@@ -142,13 +146,14 @@ class MainFragViewModel @Inject constructor(
         }
     }
 
-    private fun Throwable.toUserMessage(): String = when (this) {
-        is AppError.NetworkError -> context.getString(R.string.error_network)
-        is AppError.ParseError -> context.getString(R.string.error_parsing)
-        is AppError.ServerError -> context.getString(R.string.error_server, code)
-        is AppError.DataBaseError -> context.getString(R.string.error_database)
-        is AppError.UnknownError -> context.getString(R.string.error_unknown)
-        else -> message ?: context.getString(R.string.error_else)
+    @StringRes
+    private fun Throwable.toUserMessage(): Int = when (this) {
+        is AppError.NetworkError -> R.string.error_network
+        is AppError.ParseError -> R.string.error_parsing
+        is AppError.ServerError -> R.string.error_server
+        is AppError.DataBaseError -> R.string.error_database
+        is AppError.UnknownError -> R.string.error_unknown
+        else -> R.string.error_else
     }
 
 
@@ -160,6 +165,4 @@ class MainFragViewModel @Inject constructor(
         observeWeather(city)// <--- ЗАПУСКАЕМ НОВЫЙ КОНВЕЙЕР
         refresh(city)
     }
-
-
 }

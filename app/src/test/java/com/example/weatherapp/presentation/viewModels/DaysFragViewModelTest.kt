@@ -2,8 +2,8 @@ package com.example.weatherapp.presentation.viewModels
 
 import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
-import com.example.weatherapp.presentation.fragments.DaysFragment.DaysFragmentUiEvent
-import com.example.weatherapp.presentation.fragments.DaysFragment.DaysFragViewModel
+import com.example.weatherapp.presentation.fragments.days.DaysFragmentUiEvent
+import com.example.weatherapp.presentation.fragments.days.DaysFragViewModel
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import com.example.weatherapp.presentation.mappers.toListItem

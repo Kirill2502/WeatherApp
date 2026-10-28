@@ -1,4 +1,4 @@
-package com.example.weatherapp.presentation.fragments.HoursFragment
+package com.example.weatherapp.presentation.fragments.hours
 
 import com.example.weatherapp.presentation.models.WeatherListItemUi
 

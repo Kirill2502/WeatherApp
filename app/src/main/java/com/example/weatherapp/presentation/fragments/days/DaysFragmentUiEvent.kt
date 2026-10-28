@@ -1,7 +1,4 @@
-package com.example.weatherapp.presentation.fragments.DaysFragment
-
-import com.example.weatherapp.domain.models.DailyForecast
-import com.example.weatherapp.presentation.models.WeatherListItemUi
+package com.example.weatherapp.presentation.fragments.days
 
 sealed interface DaysFragmentUiEvent {
     // Из UI приходит только id элемента — доменный объект ViewModel найдёт сама
