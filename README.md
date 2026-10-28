@@ -108,15 +108,16 @@ text
 
 ## 🚀 Как запустить
 
-1. Клонировать репозиторий:
-   ```bash
-   git clone https://github.com/Kirill2502/WeatherApp.git
-Получить API-ключ на weatherapi.com (бесплатный тариф).
+**1. Клонировать репозиторий:**
+```bash
+git clone https://github.com/Kirill2502/WeatherApp.git
+2. Получить API-ключ:
+Зарегистрируйтесь на weatherapi.com и получите бесплатный API-ключ.
 
-Создать файл local.properties в корне проекта и добавить:
+3. Настроить local.properties:
+Создайте файл local.properties в корне проекта и добавьте туда ваш ключ:
 
 properties
 WEATHER_API_KEY=твой_ключ
-Открыть проект в Android Studio.
-
-Собрать и запустить на эмуляторе или устройстве (minSdk 24).
+4. Запустить проект:
+Откройте проект в Android Studio, дождитесь окончания синхронизации Gradle и запустите приложение на эмуляторе или реальном устройстве (минимальная версия Android — 7.0 / API 24).
