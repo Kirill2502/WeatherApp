@@ -102,8 +102,8 @@ text
 ## 📸 Скриншоты
 
 <p align="center">
-  <img src="screenshots/main_screen.png" width="250"/>
-  <img src="screenshots/days_screen.png" width="250"/>
+  <img src="screenshots/main_screen.jpg" width="250"/>
+  <img src="screenshots/days_screen.jpg" width="250"/>
 </p>
 
 ## 🚀 Как запустить
