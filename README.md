@@ -4,24 +4,25 @@ Android-приложение для отображения текущей пог
 
 ## ✨ Возможности
 
-- 📍 Определение текущего местоположения через FusedLocationProvider
+- 📍 Определение текущего местоположения через FusedLocationProvider (с поддержкой точной и приблизительной геолокации на Android 12+)
 - 🔍 Поиск погоды по названию города
 - 🌡 Текущая погода: температура, состояние, иконка, min/max
-- 📅 Прогноз на 2 дня (макс/мин температура, состояние)
-- 🕐 Почасовой прогноз
+- 📅 Прогноз на 3 дня (сегодня и 2 последующих)
+- 🕐 Почасовой прогноз (ближайшие 24 часа или выбранный день)
 - 💾 Локальное кэширование через Room (работает офлайн)
-- 🔄 Принудительное обновление данных по кнопке
+- 🔄 Кастомный Swipe-to-Refresh для обновления карточки
+- 🌐 Локализация интерфейса и данных (через параметр API `lang=ru`)
 
 ## 🛠 Технологический стек
 
 **Язык и асинхронность**
 - Kotlin
-- Coroutines + Flow (StateFlow, SharedFlow)
+- Coroutines + Flow (StateFlow, SharedFlow, Channel)
 - ViewModel, Lifecycle, repeatOnLifecycle
 
 **Архитектура**
 - Clean Architecture (data / domain / presentation)
-- MVI (Model-View-Intent)
+- MVI (Model-View-Intent) с одноразовыми эффектами
 - Repository pattern + Single Source of Truth (SSOT)
 
 **Сеть**
@@ -37,7 +38,7 @@ Android-приложение для отображения текущей пог
 - @Transaction для атомарного обновления
 
 **DI**
-- Hilt (Dagger Hilt)
+- Hilt (Dagger Hilt) с использованием `@ActivityRetainedScoped` для холдеров
 
 **UI**
 - ViewBinding
@@ -46,30 +47,35 @@ Android-приложение для отображения текущей пог
 - ViewPager2 + TabLayout
 - Picasso
 
+**Тестирование**
+- JUnit, MockK, kotlinx-coroutines-test (21 Unit-тест)
+
 ## 🧱 Архитектура
 
 Проект разделён на три слоя с чёткими границами:
-presentation → domain ← data
+`presentation → domain ← data`
 
 ### 📦 data
-- **remoteDataSource** — Retrofit API (`WeatherApi`), обёртка `RemoteData`
+- **remote** — Retrofit API (`WeatherApi`), обёртка `WeatherRemoteDataSource`
 - **models (DTO)** — `WeatherResponseDTO`, `LocationDTO`, `CurrentDTO`, `ConditionDTO`, `ForecastDTO`, `ForecastDayDTO`, `DayDTO`, `HourDTO`
 - **mappers** — `DtoToEntityMapper` (DTO → Entity), `EntityToDomainMapper` (Entity → Domain)
 - **room** — `CurrentWeatherEntity`, `ForecastDayEntity`, `HourlyWeatherEntity`, `WeatherWithDetails` (@Relation), `WeatherDao`, `WeatherDataBase`
-- **repository** — `RepositoryImplement`
+- **repository** — `WeatherRepositoryImpl`
+- **location** — `FusedLocationTracker` (реализация получения GPS)
 
 ### 📦 domain
-- **models** — `DayItem`, `WeatherResult`
-- **repository** — интерфейс `Repository`
-- **useCases** — `GetCurrentWeatherUseCase`, `GetForecastWeatherUseCase`, `GetHoursWeatherUseCase`, `RefreshWeatherUseCase`
+- **models** — `CurrentWeather`, `DailyForecast`, `HourlyForecast` (типизированные данные с `Double` и `LocalDate`)
+- **repository** — интерфейс `WeatherRepository`
+- **location** — интерфейс `LocationTracker` и `LocationResult` (sealed class)
+- **useCases** — `GetCurrentWeatherUseCase`, `GetForecastWeatherUseCase`, `GetHoursForDayUseCase`, `RefreshWeatherUseCase`
 
 ### 📦 presentation
-- **fragments** — `MainFragment`, `DaysFragment`, `HoursFragment` (каждый со своим `ViewModel`, `UiState`, `UiEvent`)
-- **holders** — `CityHolder`, `SelectedDayHolder` (@Singleton для связи между ViewModel)
+- **fragments** — `main`, `days`, `hours` (каждый со своим ViewModel, UiState, UiEvent)
+- **holders** — `CityHolder`, `SelectedDayHolder` (`@ActivityRetainedScoped` для связи между ViewModel)
 - **adapters** — `RecyclerWeatherAdapter`
-- **LocationProvider** — обёртка над FusedLocationProvider
+- **mappers** — `WeatherUiMapper` (форматирование Domain → UI)
 
-### 🔄 Поток данных (SSOT)
+## 🔄 Поток данных (SSOT)
 Retrofit → DTO → Entities → Room → Flow → Domain → ViewModel → UI
 
 text
@@ -81,20 +87,23 @@ text
 
 ## 🎯 Что реализовано
 
-- ✅ Отказ от Volley в пользу Retrofit + OkHttp
-- ✅ Замена LiveData на StateFlow
-- ✅ Переход с MVVM на MVI
+- ✅ Переход с Volley на Retrofit + OkHttp
+- ✅ Замена LiveData и EventBus на StateFlow и Channel
+- ✅ Переход с MVVM на MVI (одноразовые эффекты через Channel)
 - ✅ Кэширование через Room с нормализацией (3 таблицы)
 - ✅ SSOT: single source of truth через Room
-- ✅ Hilt для внедрения зависимостей
-- ✅ Unit-тесты на ViewModel (mockk + StandardTestDispatcher)
-- ✅ Обработка ошибок сети и парсинга
-- ✅ Runtime permissions для геолокации
+- ✅ Hilt для внедрения зависимостей (холдеры на `@ActivityRetainedScoped`)
+- ✅ Абстракция геолокации (LocationTracker + suspendCancellableCoroutine)
+- ✅ Вынос бизнес-логики фильтрации часов в Domain (с учетом часовых поясов)
+- ✅ Полная локализация (lang=ru, strings.xml, отсутствие Context в ViewModel)
+- ✅ Кастомный Swipe-to-Refresh (без ломки верстки)
+- ✅ 21 Unit-тест на ViewModel, репозиторий и мапперы (mockk + StandardTestDispatcher)
+
 ## 📸 Скриншоты
 
 <p align="center">
-  <img src="screenshots/main_screen.png" width="300"/>
-  <img src="screenshots/days_screen.png" width="300"/>
+  <img src="screenshots/main_screen.png" width="250"/>
+  <img src="screenshots/days_screen.png" width="250"/>
 </p>
 
 ## 🚀 Как запустить
@@ -102,11 +111,12 @@ text
 1. Клонировать репозиторий:
    ```bash
    git clone https://github.com/Kirill2502/WeatherApp.git
-   ```
-2. Получить API-ключ на [weatherapi.com](https://www.weatherapi.com/) (бесплатный тариф).
-3. Создать файл `local.properties` в корне проекта и добавить:
-   ```properties
-   WEATHER_API_KEY=твой_ключ
-   ```
-4. Открыть проект в **Android Studio**.
-5. Собрать и запустить на эмуляторе или устройстве.
+Получить API-ключ на weatherapi.com (бесплатный тариф).
+
+Создать файл local.properties в корне проекта и добавить:
+
+properties
+WEATHER_API_KEY=твой_ключ
+Открыть проект в Android Studio.
+
+Собрать и запустить на эмуляторе или устройстве (minSdk 24).
