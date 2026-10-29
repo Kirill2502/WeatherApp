@@ -27,14 +27,14 @@ Android-приложение для отображения текущей пог
 
 **Сеть**
 - Retrofit 2
-- OkHttp 3 + HttpLoggingInterceptor
+- OkHttp 4.12.0 + HttpLoggingInterceptor
 - Gson + @SerializedName
 
 **Локальное хранилище**
 - Room (SQLite)
 - Composite Primary Keys
 - ForeignKey с CASCADE
-- @Relation (одним запросом собирает current + forecast + hours)
+- @Relation для связывания текущей погоды, дневного и почасового прогноза
 - @Transaction для атомарного обновления
 
 **DI**
@@ -97,7 +97,7 @@ text
 - ✅ Вынос бизнес-логики фильтрации часов в Domain (с учетом часовых поясов)
 - ✅ Полная локализация (lang=ru, strings.xml, отсутствие Context в ViewModel)
 - ✅ Кастомный Swipe-to-Refresh (без ломки верстки)
-- ✅ 21 Unit-тест на ViewModel, репозиторий и мапперы (mockk + StandardTestDispatcher)
+- ✅ 21 Unit-тест: ViewModel, Repository, Use Cases и мапперы (mockk + StandardTestDispatcher)
 
 ## 📸 Скриншоты
 
