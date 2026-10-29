@@ -17,7 +17,7 @@ Android-приложение для отображения текущей пог
 
 **Язык и асинхронность**
 - Kotlin
-- Coroutines + Flow (StateFlow, SharedFlow, Channel)
+- Coroutines + Flow (StateFlow, Channel)
 - ViewModel, Lifecycle, repeatOnLifecycle
 
 **Архитектура**
