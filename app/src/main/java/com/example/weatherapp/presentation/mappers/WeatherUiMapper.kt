@@ -5,6 +5,8 @@ import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.models.HourlyForecast
 import com.example.weatherapp.presentation.models.CurrentCardUi
 import com.example.weatherapp.presentation.models.WeatherListItemUi
+import com.example.weatherapp.utils.DateFormater
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
@@ -19,9 +21,10 @@ fun Double.toTempText(): String = "${roundToInt()}°C"
 private fun maxMinText(max: Double?, min: Double?): String =
     if (max == null || min == null) "" else "${min.roundToInt()}°/${max.toTempText()}"
 
-fun DailyForecast.toListItem() = WeatherListItemUi(
+fun DailyForecast.toListItem(today: LocalDate? = null) = WeatherListItemUi(
     id = date.toString(),
-    title = date.format(DATE_FORMATE),
+    title = date.format(DATE_FORMATE), // <--- На всякий случа
+    titleRes = DateFormater.getRelationDateRes(date, today),// <--- Передаем ID
     conditionText = conditionText,
     tempText = maxMinText(maxTempC, minTempC),
     iconUrl = iconUrl

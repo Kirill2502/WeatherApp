@@ -39,7 +39,7 @@ class RecyclerWeatherAdapter(
         // Адаптер больше не форматирует данные: всё уже готово в WeatherListItemUi
         fun bind(item: WeatherListItemUi) = with(binding) {
             tempItem = item
-            tvDateItem.text = item.title
+            tvDateItem.text = item.titleRes?.let { itemView.context.getString(it) } ?: item.title
             tvConditionItem.text = item.conditionText
             tvTempItem.text = item.tempText
             if (item.iconUrl.isNotEmpty()) Picasso.get().load(item.iconUrl).into(imItem)

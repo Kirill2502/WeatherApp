@@ -10,9 +10,6 @@ class WeatherRemoteDataSource @Inject constructor(
     private val weatherApi: WeatherApi,
 ) {
 
-    suspend fun requestWeatherData(city: String): WeatherResponseDTO {
-        android.util.Log.d("WeatherDebug", "Запрос в сеть: city=$city")
-        val result = weatherApi.getForecast(apiKey = BuildConfig.WEATHER_API_KEY, city = city)
-        return result
-    }
+    suspend fun requestWeatherData(city: String): WeatherResponseDTO =
+        weatherApi.getForecast(apiKey = BuildConfig.WEATHER_API_KEY, city = city)
 }

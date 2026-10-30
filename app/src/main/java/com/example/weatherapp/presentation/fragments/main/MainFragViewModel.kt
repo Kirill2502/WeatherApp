@@ -15,10 +15,13 @@ import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import com.example.weatherapp.presentation.mappers.toCardUi
 import com.example.weatherapp.presentation.models.CurrentCardUi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,10 +44,17 @@ class MainFragViewModel @Inject constructor(
 // Если хранить ошибку в состоянии, после поворота экрана Toast показался бы снова.
     private val _effects = Channel<MainFragmentUiEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
+
+    // Поток, который будет хранить текущий город и триггерить обновления
+    private val currentCityFlow = MutableStateFlow<String?>(null)
     private var currentCity: String? = null
 
     //Это защита от повторного запроса GPS при повороте экрана.
     private var initialLoadRequested = false
+
+    init {
+        observeWeather()
+    }
 
 
     fun onEvent(event: MainFragmentUiEvent) {
@@ -100,33 +110,36 @@ class MainFragViewModel @Inject constructor(
         }
     }
 
-    private fun observeWeather(city: String) {
+    @OptIn(ExperimentalCoroutinesApi::class) // Нужно для flatMapLatest
+    private fun observeWeather() {
         viewModelScope.launch {
-            // combine следит за тремя потоками одновременно
-            combine(
-                getCurrentWeatherUseCase(city),// 1. Погода сейчас
-                getForecastWeatherUseCase(city),// 2. Список дней
-                selectedDayHolder.selectedDay// 3. Выбранная дата
-            ) { current, forecast, selectedDate ->
-                // Если дата выбрана, ищем этот день в прогнозе (совпадает ли дата)
-                val selectedDay = forecast.firstOrNull { it.date == selectedDate }
-                // Собираем карточку в зависимости от того, что есть
-                val card = when {
-                    // Если день выбран — берем данные дня, а имя города из текущей погоды
-                    selectedDay != null -> selectedDay.toCardUi(current?.cityName.orEmpty())
-                    // Если день не выбран, но есть текущая погода — показываем её
-                    current != null -> current.toCardUi()
-                    // Если вообще ничего нет — пустая карточка
-                    else -> CurrentCardUi()
+            currentCityFlow
+                .filterNotNull() // Ждем, пока появится первый город
+                .flatMapLatest { city -> // flatMapLatest убивает старую подписку при смене города!
+                    combine(
+                        getCurrentWeatherUseCase(city),
+                        getForecastWeatherUseCase(city),
+                        selectedDayHolder.selectedDay
+                    ) { current, forecast, selectedDate ->
+                        // Логика сборки карточки
+                        val selectedDay = forecast.firstOrNull { it.date == selectedDate }
+                        when {
+                            selectedDay != null -> selectedDay.toCardUi(current?.cityName.orEmpty())
+                            current != null -> current.toCardUi()
+                            else -> CurrentCardUi()
+                        }
+                    }
                 }
-                card // Возвращаем готовую карточку
-            }.collect { card ->
-                // Обновляем экран
-                _uiState.update { it.copy(currentCard = card, city = city) }
-            }
+                .collect { card ->
+                    // Обновляем состояние. Данные приходят ТОЛЬКО от последнего города.
+                    _uiState.update {
+                        it.copy(
+                            currentCard = card,
+                            city = currentCityFlow.value ?: ""
+                        )
+                    }
+                }
         }
-
-
     }
 
 
@@ -162,7 +175,7 @@ class MainFragViewModel @Inject constructor(
         currentCity = city
         cityHolder.set(city)
         selectedDayHolder.clear()// <--- СБРАСЫВАЕМ СТАРУЮ ДАТУ ПРИ СМЕНЕ ГОРОДА
-        observeWeather(city)// <--- ЗАПУСКАЕМ НОВЫЙ КОНВЕЙЕР
+        currentCityFlow.value = city
         refresh(city)
     }
 }

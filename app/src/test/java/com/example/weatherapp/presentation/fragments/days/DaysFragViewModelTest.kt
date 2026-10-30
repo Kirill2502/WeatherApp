@@ -1,9 +1,7 @@
-package com.example.weatherapp.presentation.viewModels
+package com.example.weatherapp.presentation.fragments.days
 
 import com.example.weatherapp.domain.models.DailyForecast
 import com.example.weatherapp.domain.useCases.GetForecastWeatherUseCase
-import com.example.weatherapp.presentation.fragments.days.DaysFragmentUiEvent
-import com.example.weatherapp.presentation.fragments.days.DaysFragViewModel
 import com.example.weatherapp.presentation.holders.CityHolder
 import com.example.weatherapp.presentation.holders.SelectedDayHolder
 import com.example.weatherapp.presentation.mappers.toListItem
@@ -20,8 +18,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
@@ -58,7 +55,10 @@ class DaysFragViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals(emptyList<WeatherListItemUi>(), viewModel.uiState.value.forecastListData)
+        Assert.assertEquals(
+            emptyList<WeatherListItemUi>(),
+            viewModel.uiState.value.forecastListData
+        )
     }
 
     @Test
@@ -70,7 +70,10 @@ class DaysFragViewModelTest {
         cityHolder.set("Moscow")
         advanceUntilIdle()
 
-        assertEquals(forecast.map { it.toListItem() }, viewModel.uiState.value.forecastListData)
+        Assert.assertEquals(
+            forecast.map { it.toListItem() },
+            viewModel.uiState.value.forecastListData
+        )
         verify(exactly = 1) { getForecastWeatherUseCase("Moscow") }
     }
 
@@ -83,7 +86,7 @@ class DaysFragViewModelTest {
 
         viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(tomorrow.date.toString()))
 
-        assertEquals(tomorrow.date, selectedDayHolder.selectedDay.value)
+        Assert.assertEquals(tomorrow.date, selectedDayHolder.selectedDay.value)
     }
 
     @Test
@@ -96,7 +99,7 @@ class DaysFragViewModelTest {
 
         viewModel.onEvent(DaysFragmentUiEvent.OnDaySelect(today.date.toString()))
 
-        assertNull(selectedDayHolder.selectedDay.value)
+        Assert.assertNull(selectedDayHolder.selectedDay.value)
     }
 
     private val today = DailyForecast(
